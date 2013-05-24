@@ -1,0 +1,232 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# Copyright 2011 Tomo Krajina
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import sys as mod_sys
+import os as mod_os
+import os.path as mod_path
+import datetime as mod_datetime
+
+import gitutils as mod_gitutils
+
+# Prefix for git command output:
+PREFIX = '\t'
+
+args = mod_sys.argv[1 :]
+current_path = mod_os.getcwd()
+
+# If true, projects with same git command output will be groupped together:
+group_by_output = True
+
+# -c switch in command line, if true execute only if project not changed (i.e.
+# the `git --porcelain` output is empty:
+only_if_changed = False
+
+def get_arg(args, short_name, long_name):
+    for i in range(len(args)):
+        arg = args[i]
+        if arg[0] != '-':
+            return None
+        if arg.startswith('--%s=' % long_name):
+            args.remove(arg)
+            return arg.replace('--%s=' % long_name, '')
+        elif arg == '-%s' % short_name:
+            result = args[i + 1]
+            args.remove('-%s' % short_name)
+            args.remove(result)
+            return result
+    return None
+
+def has_arg(args, short_name, long_name):
+    for arg in args:
+        if arg[0] != '-':
+            return False
+        if arg == '--%s' % long_name or arg == '-%s' % short_name:
+            args.remove(arg)
+            return True
+    return False
+
+def is_ignored(project):
+    return file_name in ignore_projects
+
+def process_project(current_path, file_name):
+    if is_ignored(file_name in ignore_projects):
+        return
+
+    dir_path = '%s/%s' % (current_path, file_name)
+    mod_os.chdir(dir_path)
+
+    output = ''
+
+    if group_by_output:
+        do_output = False
+    else:
+        do_output = True
+
+    if not group_by_output:
+        print '%s:' % file_name
+
+    execute = True
+    if only_if_changed:
+        execute = mod_gitutils.is_changed()
+        if not execute:
+            output = PREFIX + 'Not changed'
+            if do_output:
+                print output
+
+    if execute:
+        executed, result = mod_gitutils.execute_command(git_command, output=do_output, prefix=PREFIX, grep=grep)
+        result = result.rstrip()
+
+        if not executed:
+            output = '\tError executing:%s' % git_command
+        elif result:
+            output = result
+        else:
+            output = '\tOK'
+
+    if group_by_output:
+        if outputs.has_key(output):
+            outputs[output].append(file_name)
+        else:
+            outputs[output] = [file_name]
+
+show_progress = True
+
+# If true, projects with same git command output will be groupped together:
+group_by_output = False
+
+# Check if to group results by output:
+# Set by:
+# 	git config --global 'multi.groupbyoutput' 1
+# Unset by:
+# 	git config --global --unset 'multi.groupbyoutput'
+config_properties = mod_gitutils.get_config_properties()
+group_by_output_config_key = 'multi.groupbyoutput'
+if group_by_output_config_key in config_properties:
+    group_by_output_config_value = config_properties[group_by_output_config_key]
+
+    if group_by_output_config_value:
+        if group_by_output_config_value.lower() in ('true', '1'):
+            group_by_output = True
+
+# Check if to do backup of projects:
+backup = has_arg(args, 'a', 'archive')
+
+# Check if needed to be executed on only one project:
+single_project = get_arg(args, 'p', 'project')
+if single_project and single_project[-1] == '/':
+    single_project = single_project[: -1]
+
+# Check projects which we don't need to be part of gut multi commands execution:
+except_projects = get_arg(args, 'e', 'except')
+
+# Check if to execute only on projects which contain some changes:
+only_if_changed = has_arg(args, 'c', 'changed')
+
+# Output only the current branch for all projects:
+branch = has_arg(args, 'b', 'branch')
+branch_verbose = has_arg(args, 'bv', 'branch-verbose')
+
+# Compute projects to be executed:
+ignore_projects = []
+if mod_path.exists('.multigit_ignore'):
+    f = open('.multigit_ignore')
+    for line in f:
+        project = line.strip()
+        ignore_projects.append(project)
+    print 'Ignoring:', ', '.join(ignore_projects)
+    f.close()
+
+# Execute backup?
+if backup:
+    now = mod_datetime.datetime.now()
+    now = now.strftime('%Y-%m-%d-%H-%M')
+    tar_name = 'git-repositories-%s.tar' % (now)
+
+    executed, output = mod_gitutils.execute_command('tar cvf %s */.git */.gitignore' % tar_name, output = True)
+
+    print 'Saved git repositories to %s' % tar_name
+
+    mod_sys.exit(0)
+
+grep = None
+
+# If no specific command is entered (i.e. only 'git multi'):
+git_command = 'status -s'
+if args:
+    git_command = ' '.join(args)
+
+if branch_verbose:
+    git_command = 'branch -v'
+    group_by_output = True
+    grep = '* '
+elif branch:
+    git_command = 'branch'
+    grep = '* '
+
+if git_command.startswith('gitk'):
+    git_command = git_command
+else:
+    git_command = 'git %s' % git_command
+
+print '--------------------------------------------------------------------------------'
+if grep:
+   print 'Executing: %s | grep %s' % ( git_command, grep )
+else:
+   print 'Executing %s' % git_command
+print '--------------------------------------------------------------------------------'
+
+# Used when group_by_output == True, keys are output, values are a list of projects
+outputs = {}
+
+if show_progress and group_by_output:
+    print 'Progress:',
+    mod_sys.stdout.flush()
+
+# Execute command on all subdirectories:
+for file_name in mod_os.listdir('.'):
+    if not single_project or single_project == file_name:
+        mod_os.chdir(current_path)
+
+        if mod_path.isdir(file_name):
+            if mod_path.exists('%s/.git' % file_name):
+                process_project(current_path, file_name)
+
+                if show_progress and group_by_output:
+                    print '*',
+                    mod_sys.stdout.flush()
+if show_progress and group_by_output:
+    print
+    print '--------------------------------------------------------------------------------'
+
+# If group_by_output, then output them now:
+if group_by_output:
+    result_outputs = []
+    output_keys = outputs.keys()
+    output_keys.sort()
+    for output in output_keys:
+        projects = outputs[output]
+        projects.sort()
+
+        result_outputs.append([', '.join(projects) + ':', output])
+        print
+
+    result_outputs.sort()
+    for key, value in result_outputs:
+        print key
+        print value
+        print
