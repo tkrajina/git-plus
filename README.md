@@ -103,12 +103,12 @@ Another example:
     $ git relation branch-1 branch-2
     branch-1 and branch-2 DIVERGED, common point is 7e0bb439dd2aef4ff0262afec0a98461489becae
 
-    Commits from 7e0bb439dd2aef4ff0262afec0a98461489becae to new-path-editor--js-namespace:
+    Commits from 7e0bb439dd2aef4ff0262afec0a98461489becae to branch-1:
       3d0246b Tomo Krajina js namespace, 3 weeks ago
       60215aa Tomo Krajina Merge branch 'new-path-editor' into new-path-editor--js-namespace, 3 weeks ago
       1e76deb Tomo Krajina js namespace, 5 weeks ago
 
-    Commits from 7e0bb439dd2aef4ff0262afec0a98461489becae to new-path-editor--point-editor-fix:
+    Commits from 7e0bb439dd2aef4ff0262afec0a98461489becae to branch-2:
       359eff6 Tomo Krajina form event functions, 5 hours ago
       a99b5f8 Tomo Krajina ..., 3 weeks ago
       1d3b97c Tomo Krajina Preparations for marker handler, 3 weeks ago
@@ -140,7 +140,7 @@ Note that branches will not be removed unconditionally, you'll be asked once aga
 
 # Installation
 
-Add a this directory to your $PATH:
+Add this directory to your $PATH:
 
     export PATH=$PATH:/path/to/git-plus
 
