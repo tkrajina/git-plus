@@ -83,7 +83,60 @@ Or reset to default with:
 
 ## Git relation
 
+Git relation gives you the relation between two commits/branches/tags. For example:
+
+    get relation master test-branch
+
+...will tell you if two branches are equals, or if master is AHEAD of test-branch or if master is BEHIND test-branch or if they diverged in some commit in history.
+
+For example:
+
+    $ git relation master test-branch
+    master is AHEAD of test-branch
+
+    Commits from test-branch to master:
+      2176e45 Tomo Krajina git-multi in README, 18 hours ago
+      50b2f79 Tomo Krajina + README, 18 hours ago
+
+Another example:
+
+    $ git relation branch-1 branch-2
+    branch-1 and branch-2 DIVERGED, common point is 7e0bb439dd2aef4ff0262afec0a98461489becae
+
+    Commits from 7e0bb439dd2aef4ff0262afec0a98461489becae to new-path-editor--js-namespace:
+      3d0246b Tomo Krajina js namespace, 3 weeks ago
+      60215aa Tomo Krajina Merge branch 'new-path-editor' into new-path-editor--js-namespace, 3 weeks ago
+      1e76deb Tomo Krajina js namespace, 5 weeks ago
+
+    Commits from 7e0bb439dd2aef4ff0262afec0a98461489becae to new-path-editor--point-editor-fix:
+      359eff6 Tomo Krajina form event functions, 5 hours ago
+      a99b5f8 Tomo Krajina ..., 3 weeks ago
+      1d3b97c Tomo Krajina Preparations for marker handler, 3 weeks ago
+      9546769 Tomo Krajina Removed all subscription stuff, 3 months ago
+
 ## Git old-branches
+
+Old-branches can detect old/unused branches.
+
+Find local branches older than 10 days:
+
+    $ git old-branches -d 10
+
+Find remote branches older than 60 days:
+
+    $ git old-branches -r -d 10
+
+Find local remote branches older than 120 days:
+
+    $ git old-branches -a -d 10
+
+Find and remove branches older than 10 days:
+
+    $ git old-branches -d 10 --delete
+    Branch old-branch is older than 10 days (13.89)!
+    Remove [yes/N] ?
+
+Note that branches will not be removed unconditionally, you'll be asked once again if you are sure.
 
 # Installation
 
