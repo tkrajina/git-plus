@@ -126,7 +126,7 @@ Find remote branches older than 60 days:
 
     $ git old-branches -r -d 10
 
-Find local remote branches older than 120 days:
+Find local and remote branches older than 120 days:
 
     $ git old-branches -a -d 10
 
@@ -136,7 +136,7 @@ Find and remove branches older than 10 days:
     Branch old-branch is older than 10 days (13.89)!
     Remove [yes/N] ?
 
-Note that branches will not be removed unconditionally, you'll be asked once again if you are sure.
+Note that branches will not be removed unconditionally, you'll be asked once again to confirm.
 
 # Installation
 
