@@ -52,8 +52,17 @@ def get_branches(remote=False, all=False):
     return map(_filter_branch, lines)
 
 def delete_branch(branch, force=False):
-    # TODO: Delete remote branches?
-    execute_git('branch %s %s' % ('-D' if force else '-d', branch))
+    if '/' in branch:
+        if branch.startswith('remotes/'):
+            branch = branch.replace('remotes/', '')
+        parts = branch.split('/')
+        if len(parts) == 2:
+            origin_name, branch_name = parts
+            execute_git('push %s :%s' % (origin_name, branch_name))
+        else:
+            print 'Don\'t knod how to delete %s' % branch
+    else:
+        execute_git('branch %s %s' % ('-D' if force else '-d', branch))
 
 def get_config_properties():
     executed, output = execute_git('config -l', output=False)

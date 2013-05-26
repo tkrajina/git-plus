@@ -55,6 +55,6 @@ for branch in branches:
         if args.delete:
             answer = raw_input('Remove [yes/N] ?')
             if answer.lower() == 'yes':
-                delete_branch(branch, force=True)
+                mod_gitutils.delete_branch(branch, force=True)
             else:
                 print 'Not deleted'
