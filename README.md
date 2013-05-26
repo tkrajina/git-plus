@@ -136,7 +136,7 @@ Find and remove branches older than 10 days:
     Branch old-branch is older than 10 days (13.89)!
     Remove [yes/N] ?
 
-Note that branches will not be removed unconditionally, you'll be asked once again to confirm.
+Note that branches will not be removed unconditionally, you'll be asked once to confirm the deletion.
 
 # Installation
 
