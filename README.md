@@ -39,6 +39,10 @@ Execute "git gui" only on repositories which contain some changes:
 
     git multi -c gui
 
+Make the output quiet - do not show any output for repositories with no changes:
+
+    git multi -q status
+
 Switch to "master" for all repositories:
 
     git multi checkout master

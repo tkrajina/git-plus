@@ -34,6 +34,7 @@ group_by_output = True
 # -c switch in command line, if true execute only if project not changed (i.e.
 # the `git --porcelain` output is empty:
 only_if_changed = False
+be_quiet = False
 
 
 def get_arg(args, short_name, long_name):
@@ -84,6 +85,10 @@ def process_project(current_path, file_name):
 
     dir_path = '%s/%s' % (current_path, file_name)
     mod_os.chdir(dir_path)
+
+    if not mod_gitutils.is_changed():
+        if be_quiet:
+            return
 
     output = ''
 
@@ -152,6 +157,7 @@ except_projects = get_arg(args, 'e', 'except')
 
 # Check if to execute only on projects which contain some changes:
 only_if_changed = has_arg(args, 'c', 'changed')
+be_quiet = has_arg(args, 'q', 'quiet')
 
 # Output only the current branch for all projects:
 branch = has_arg(args, 'b', 'branch')
