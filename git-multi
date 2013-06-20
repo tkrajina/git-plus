@@ -92,7 +92,7 @@ def process_project(current_path, file_name):
 
     output = ''
 
-    if group_by_output:
+    if group_by_output or branch_name:
         do_output = False
     else:
         do_output = True
@@ -114,6 +114,11 @@ def process_project(current_path, file_name):
 
         if not executed:
             output = '\tError executing:%s' % git_command
+        elif branch_name:
+            # Only output repos not on branch
+            branch_name_differs = (branch_name != result.strip())
+            if branch_name_differs:
+                print '\tCurrent branch: %s' % result
         elif result:
             output = result
         else:
@@ -159,9 +164,12 @@ except_projects = get_arg(args, 'e', 'except')
 only_if_changed = has_arg(args, 'c', 'changed')
 be_quiet = has_arg(args, 'q', 'quiet')
 
-# Output only the current branch for all projects:
+# Show current branch for all projects:
 branch = has_arg(args, 'b', 'branch')
 branch_verbose = has_arg(args, 'bv', 'branch-verbose')
+
+# Show projects not on specified branch
+branch_name = get_arg(args, 'B', 'branch-name')
 
 # Compute projects to be executed:
 ignore_projects = []
@@ -212,9 +220,9 @@ if branch_verbose:
     git_command = ['branch', '-v']
     group_by_output = True
     grep = '* '
-elif branch:
-    git_command = ['branch']
-    grep = '* '
+elif branch or branch_name:
+    git_command = ['rev-parse', '--abbrev-ref', 'HEAD']
+
 
 if git_command[0] == 'gitk':
     git_command = git_command

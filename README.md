@@ -47,6 +47,10 @@ Switch to "master" for all repositories:
 
     git multi checkout master
 
+Show all repositories that are not on the specified branch
+
+    git multi -B <branch name>
+
 Create a "test" branch on all repositories and checkout it immediately:
 
     git multi checkout -b test
