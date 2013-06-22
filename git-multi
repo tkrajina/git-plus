@@ -20,76 +20,172 @@ import os as mod_os
 import os.path as mod_path
 import datetime as mod_datetime
 
+try:
+    import argparse as mod_argparse
+except ImportError:
+    print 'ERROR: Missing argparse module: Requires Python >= 2.7'
+    mod_sys.exit(1)
+
 import gitutils as mod_gitutils
+
+Description = """
+The git-multi script enhances git with a new command: 'multi'. All
+arguments not known to git-multi are passed through to the git command
+run for each repo found in the directory.
+
+This lets you run a single git command on multiple git repos with a
+single command line.
+"""
+
+Epilog = """
+Some git-multi arguments can mask git command arguments. To work around
+this, add a '--' argument after the last git-multi argument and all
+arguments after the '--' will be ignored by git-multi and passed
+directly to git. For example, to run 'git multi branch -a' without
+triggering 'git multi --archive':
+
+    $ git multi branch -- -a
+
+The -p options will override excluded projects (either in
+.multigit_ignore or given with -e) allowing git-multi to operate on
+them.
+"""
 
 # Prefix for git command output:
 PREFIX = '\t'
 
-args = mod_sys.argv[1:]
 current_path = mod_os.getcwd()
 
-# If true, projects with same git command output will be groupped together:
-group_by_output = True
+# Check if to group results by output:
+# Set by:
+# 	git config --global 'multi.groupbyoutput' 1
+# Unset by:
+# 	git config --global --unset 'multi.groupbyoutput'
+def process_global_config():
+    multi_cfg = {}
+    config_properties = mod_gitutils.get_config_properties()
+    value = config_properties.get('multi.groupbyoutput', 'false')
+    multi_cfg['group_by_output'] = True if value.lower() in ('true', '1') else False
+    return multi_cfg
 
-# -c switch in command line, if true execute only if project not changed (i.e.
-# the `git --porcelain` output is empty:
-only_if_changed = False
-be_quiet = False
+def parse_cmd_line ():
+    # Values from git config files as defaults where appropriate.
+    multi_global_config = process_global_config()
+
+    # Handle multi args which conflict with git args.
+    argv = mod_sys.argv[1:]
+    if '--' in argv:
+        idx = argv.index('--')
+        multi_args = argv[:idx]
+        g_args = argv[idx+1:]
+    else:
+        multi_args = argv
+        g_args = []
+
+    parser = mod_argparse.ArgumentParser(description=Description, epilog=Epilog,
+                                         formatter_class=mod_argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('-a', '--archive',
+                        action='store_true',
+                        help='Archive projects to a tarball.')
+    parser.add_argument('--branch',
+                        action='store_true',
+                        help='Output only the current branch for all projects.')
+    parser.add_argument('--branch-verbose',
+                        action='store_true',
+                        help='Verbose branch information (same as --branch, but more verbose)')
+    parser.add_argument('-B', '--branch-name',
+                        action='store',
+                        help='Show projects not on specified branch')
+    parser.add_argument('-c', '--changed',
+                        action='store_true',
+                        dest='only_if_changed',
+                        help='Execute only if project not changed.')
+    parser.add_argument('--debug',
+                        action='store_true',
+                        help='Output git-multi debug information.')
+    parser.add_argument('-e', '--exclude',
+                        action='append',
+                        metavar='PROJECT',
+                        help='Add project to list of projects to exclude.')
+    parser.add_argument('-g', '--group-by-output',
+                        action='store_true',
+                        dest='group_by_output',
+                        default=multi_global_config['group_by_output'],
+                        help='Projects with same git command output will be groupped together.')
+    parser.add_argument('-p', '--project',
+                        action='append',
+                        metavar='PROJECT',
+                        dest='project_list',
+                        help=("Add arg to list of projects to work on. "
+                              "Can be given multiple times. Each PROJECT value can be "
+                              "a ':' separated list of projects."))
+    parser.add_argument('-q', '--quiet',
+                        action='store_true',
+                        dest='be_quiet',
+                        help='If project unchanged, do not output anything.')
+
+    opts,git_args = parser.parse_known_args(args=multi_args)
+    git_args.extend(g_args)
+
+    opts.show_progress = True
+
+    # Force group by output if '--branch-verbose' is used.
+    if opts.branch_verbose:
+        opts.group_by_output = True
+
+    # Allow each instance of -p to specify multiple projects separated with ':'.
+    if opts.project_list is None:
+        opts.project_list = []
+
+    if opts.project_list:
+        proj_list = []
+        for proj in opts.project_list:
+            proj_list.extend(proj.split(':'))
+        opts.project_list = proj_list
+
+    # Add projects from .multigit_ignore to exclude list.
+    if opts.exclude is None:
+        opts.exclude = []
+    else:
+        excl = []
+        for proj in opts.exclude:
+            excl.extend([p for p in proj.split(':') if p not in opts.project_list])
+        opts.exclude = excl
+
+    if mod_path.exists('.multigit_ignore'):
+        for line in open('.multigit_ignore'):
+            project = line.strip()
+            if project not in opts.project_list:
+                opts.exclude.append(project)
+
+    if opts.exclude:
+        print 'Ignoring:'
+        for proj in opts.exclude:
+            print '%s%s' % (PREFIX, proj)
+
+    return opts,git_args
 
 
-def get_arg(args, short_name, long_name):
-    for i in range(len(args)):
-        arg = args[i]
-        if arg[0] != '-':
-            return None
-        if arg.startswith('--%s=' % long_name):
-            args.remove(arg)
-            return arg.replace('--%s=' % long_name, '')
-        elif arg == '-%s' % short_name:
-            result = args[i + 1]
-            args.remove('-%s' % short_name)
-            args.remove(result)
-            return result
-    return None
-
-
-def has_arg(args, short_name, long_name):
-    for arg in args:
-        if arg[0] != '-':
-            return False
-        if arg == '--%s' % long_name or arg == '-%s' % short_name:
-            args.remove(arg)
-            return True
-    return False
-
-
-def is_ignored(project):
-    return project in ignore_projects
-
-
-def process_project(current_path, file_name):
-    if is_ignored(file_name):
-        return
-
+def process_project(current_path, file_name, options):
     dir_path = '%s/%s' % (current_path, file_name)
     mod_os.chdir(dir_path)
 
     if not mod_gitutils.is_changed():
-        if be_quiet:
+        if options.be_quiet:
             return
 
     output = ''
 
-    if group_by_output or branch_name:
+    if options.group_by_output or options.branch_name:
         do_output = False
     else:
         do_output = True
 
-    if not group_by_output:
+    if not options.group_by_output:
         print '%s:' % file_name
 
     execute = True
-    if only_if_changed:
+    if options.only_if_changed:
         execute = mod_gitutils.is_changed()
         if not execute:
             output = PREFIX + 'Not changed'
@@ -102,9 +198,9 @@ def process_project(current_path, file_name):
 
         if not executed:
             output = '\tError executing:%s' % git_command
-        elif branch_name:
+        elif options.branch_name:
             # Only output repos not on branch
-            branch_name_differs = (branch_name != result.strip())
+            branch_name_differs = (options.branch_name != result.strip())
             if branch_name_differs:
                 print '\tCurrent branch: %s' % result
         elif result:
@@ -112,70 +208,25 @@ def process_project(current_path, file_name):
         else:
             output = '\tOK'
 
-    if group_by_output:
+    if options.group_by_output:
         if output in outputs:
             outputs[output].append(file_name)
         else:
             outputs[output] = [file_name]
 
-show_progress = True
+options,git_args = parse_cmd_line()
 
-# If true, projects with same git command output will be groupped together:
-group_by_output = False
-
-# Check if to group results by output:
-# Set by:
-# 	git config --global 'multi.groupbyoutput' 1
-# Unset by:
-# 	git config --global --unset 'multi.groupbyoutput'
-config_properties = mod_gitutils.get_config_properties()
-group_by_output_config_key = 'multi.groupbyoutput'
-if group_by_output_config_key in config_properties:
-    group_by_output_config_value = config_properties[group_by_output_config_key]
-
-    if group_by_output_config_value:
-        if group_by_output_config_value.lower() in ('true', '1'):
-            group_by_output = True
-
-# Check if to do backup of projects:
-backup = has_arg(args, 'a', 'archive')
-
-# Check if needed to be executed on only one project:
-single_project = get_arg(args, 'p', 'project')
-if single_project and single_project[-1] == '/':
-    single_project = single_project[: -1]
-
-# Check projects which we don't need to be part of gut multi commands execution:
-except_projects = get_arg(args, 'e', 'except')
-
-# Check if to execute only on projects which contain some changes:
-only_if_changed = has_arg(args, 'c', 'changed')
-be_quiet = has_arg(args, 'q', 'quiet')
-
-# Show current branch for all projects:
-branch = has_arg(args, 'b', 'branch')
-branch_verbose = has_arg(args, 'bv', 'branch-verbose')
-
-# Show projects not on specified branch
-branch_name = get_arg(args, 'B', 'branch-name')
-
-# Compute projects to be executed:
-ignore_projects = []
-if mod_path.exists('.multigit_ignore'):
-    f = open('.multigit_ignore')
-    for line in f:
-        project = line.strip()
-        ignore_projects.append(project)
-    print 'Ignoring:', ', '.join(ignore_projects)
-    f.close()
+if options.debug:
+    print 'OPTS:', options
+    print 'GIT_ARGS:', git_args
 
 # Execute backup?
-if backup:
+if options.archive:
     now = mod_datetime.datetime.now()
     now = now.strftime('%Y-%m-%d-%H-%M')
     tar_name = 'git-repositories-%s.tar.xz' % (now)
 
-    repos = mod_gitutils.get_project_list()
+    repos = mod_gitutils.get_project_list(options.exclude)
 
     dot_gitignores = []
     for repo in repos:
@@ -201,14 +252,14 @@ grep = None
 
 # If no specific command is entered (i.e. only 'git multi'):
 git_command = ['status', '-s']
-if args:
-    git_command = args
 
-if branch_verbose:
+if git_args:
+    git_command = git_args
+
+if options.branch_verbose:
     git_command = ['branch', '-v']
-    group_by_output = True
     grep = '* '
-elif branch or branch_name:
+elif options.branch or options.branch_name:
     git_command = ['rev-parse', '--abbrev-ref', 'HEAD']
 
 
@@ -227,28 +278,28 @@ print '-------------------------------------------------------------------------
 # Used when group_by_output == True, keys are output, values are a list of projects
 outputs = {}
 
-if show_progress and group_by_output:
+if options.show_progress and options.group_by_output:
     print 'Progress:',
     mod_sys.stdout.flush()
 
 # Execute command on all subdirectories:
-for file_name in mod_gitutils.get_project_list():
-    if not single_project or single_project == file_name:
+for file_name in mod_gitutils.get_project_list(options.exclude):
+    if not options.project_list or file_name in options.project_list:
         mod_os.chdir(current_path)
 
         if mod_path.isdir(file_name):
             if mod_path.exists('%s/.git' % file_name):
-                process_project(current_path, file_name)
+                process_project(current_path, file_name, options)
 
-                if show_progress and group_by_output:
+                if options.show_progress and options.group_by_output:
                     print '*',
                     mod_sys.stdout.flush()
-if show_progress and group_by_output:
+if options.show_progress and options.group_by_output:
     print
     print '--------------------------------------------------------------------------------'
 
 # If group_by_output, then output them now:
-if group_by_output:
+if options.group_by_output:
     result_outputs = []
     output_keys = outputs.keys()
     output_keys.sort()
