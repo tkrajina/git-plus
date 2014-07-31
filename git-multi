@@ -232,7 +232,7 @@ if show_progress and group_by_output:
     mod_sys.stdout.flush()
 
 # Execute command on all subdirectories:
-for file_name in mod_os.listdir('.'):
+for file_name in mod_gitutils.get_project_list():
     if not single_project or single_project == file_name:
         mod_os.chdir(current_path)
 
