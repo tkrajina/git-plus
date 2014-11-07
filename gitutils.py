@@ -6,6 +6,7 @@ import pdb
 import os as mod_os
 import os.path as mod_path
 import sys as mod_sys
+import subprocess
 
 def assert_in_git_repository():
     success, lines = execute_git('status', output=False)
@@ -15,8 +16,16 @@ def assert_in_git_repository():
 
 def execute_command(command, output=True, prefix='', grep=None):
     result = ''
-    p = mod_os.popen(command)
-    for line in p:
+
+    if type(command) is not list:
+        command = command.split(' ')
+
+    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=-1)
+    (cmdout, cmderr) = p.communicate()
+    if cmdout is None:
+        return (0, "")
+
+    for line in cmdout.split('\n'):
         output_line = prefix + ('%s' % line).rstrip() + '\n'
         if not grep or grep in output_line:
             if output and output_line:
@@ -24,7 +33,7 @@ def execute_command(command, output=True, prefix='', grep=None):
                 mod_sys.stdout.flush()
             result += output_line
 
-    return (not p.close(), result)
+    return (not p.returncode, result)
 
 def execute_git(command, output=True, prefix='', grep=None):
     return execute_command('git %s' % command, output, prefix, grep)
