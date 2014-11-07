@@ -166,28 +166,28 @@ if backup:
 grep = None
 
 # If no specific command is entered (i.e. only 'git multi'):
-git_command = 'status -s'
+git_command = ['status', '-s']
 if args:
-    git_command = ' '.join(args)
+    git_command = args
 
 if branch_verbose:
-    git_command = 'branch -v'
+    git_command = ['branch', '-v']
     group_by_output = True
     grep = '* '
 elif branch:
-    git_command = 'branch'
+    git_command = ['branch']
     grep = '* '
 
-if git_command.startswith('gitk'):
+if git_command[0] == 'gitk':
     git_command = git_command
 else:
-    git_command = 'git %s' % git_command
+    git_command.insert(0, 'git')
 
 print '--------------------------------------------------------------------------------'
 if grep:
-   print 'Executing: %s | grep %s' % ( git_command, grep )
+   print 'Executing: %s | grep %s' % ( ' '.join(git_command), grep )
 else:
-   print 'Executing %s' % git_command
+   print 'Executing %s' % ' '.join(git_command)
 print '--------------------------------------------------------------------------------'
 
 # Used when group_by_output == True, keys are output, values are a list of projects
