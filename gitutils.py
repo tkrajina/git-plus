@@ -69,7 +69,7 @@ def delete_branch(branch, force=False):
             origin_name, branch_name = parts
             execute_git('push %s :%s' % (origin_name, branch_name))
         else:
-            print 'Don\'t knod how to delete %s' % branch
+            print 'Don\'t know how to delete %s' % branch
     else:
         execute_git('branch %s %s' % ('-D' if force else '-d', branch))
 
