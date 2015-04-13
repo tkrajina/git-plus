@@ -45,16 +45,19 @@ for branch in branches:
     success, result = mod_gitutils.execute_git('log ' + branch + ' -1 --format=%at -- .', output=False)
     assert success
 
-    time_diff_seconds = int(now) - int(result)
-    time_diff_days = int((float(time_diff_seconds) / (60*60*24)) * 100) / 100.
+    if len(result.strip()) == 0:
+        print 'Cannot find the age of %s' % branch
+    else:
+        time_diff_seconds = int(now) - int(result)
+        time_diff_days = int((float(time_diff_seconds) / (60*60*24)) * 100) / 100.
 
-    #print 'Last commit in %s was %s days ago' % (branch, time_diff_days)
+        #print 'Last commit in %s was %s days ago' % (branch, time_diff_days)
 
-    if time_diff_days > args.days:
-        print 'Branch %s is older than %s days (%s)!' % (branch, args.days, time_diff_days)
-        if args.delete:
-            answer = raw_input('Remove [yes/N] ?')
-            if answer.lower() == 'yes':
-                mod_gitutils.delete_branch(branch, force=True)
-            else:
-                print 'Not deleted'
+        if time_diff_days > args.days:
+            print 'Branch %s is older than %s days (%s)!' % (branch, args.days, time_diff_days)
+            if args.delete:
+                answer = raw_input('Remove [yes/N] ?')
+                if answer.lower() == 'yes':
+                    mod_gitutils.delete_branch(branch, force=True)
+                else:
+                    print 'Not deleted'
