@@ -52,7 +52,7 @@ def get_git_sha1(branch_name):
 def print_log(commit_1, commit_2):
     print 'Commits from \033[1;34m%s\033[1;m to \033[1;34m%s\033[1;m:' % (commit_1, commit_2)
     success, log = mod_gitutils.execute_git(
-            'log %s..%s --format="  %%h %%Cgreen%%an%%Creset \"%%Cred%%s%%Creset\", %%ar"' % (commit_1, commit_2),
+            'log %s..%s --format=%%x20%%x20%%x20%%h%%x20%%Cgreen%%an%%Creset%%x20\"%%Cred%%s%%Creset\",%%x20%%ar' % (commit_1, commit_2),
             output=False)
     if not success:
         print 'Error retrieving log %s..%s' % (commit_1, commit_2)
