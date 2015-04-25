@@ -50,14 +50,28 @@ def get_git_sha1(branch_name):
     return sha1.strip()
 
 def print_log(commit_1, commit_2):
-    print 'Commits from \033[1;34m%s\033[1;m to \033[1;34m%s\033[1;m:' % (commit_1, commit_2)
     success, log = mod_gitutils.execute_git(
             'log %s..%s --format=%%x20%%x20%%x20%%h%%x20%%Cgreen%%an%%Creset%%x20\"%%Cred%%s%%Creset\",%%x20%%ar' % (commit_1, commit_2),
             output=False)
     if not success:
         print 'Error retrieving log %s..%s' % (commit_1, commit_2)
         mod_sys.exit(1)
-    print log.rstrip()
+    result = log.rstrip()
+
+    lines = result.split('\n')
+
+    print '%s commits from \033[1;34m%s\033[1;m to \033[1;34m%s\033[1;m:' % (len(lines), commit_1, commit_2)
+
+    if len(lines) < 30:
+        print result
+        return
+
+    first = lines[:10]
+    last = lines[-10:]
+
+    lines = first + ['   ...%s more commits...' % (len(lines) - len(first) - len(last))] + last
+
+    print '\n'.join(lines)
 
 branch_1 = branches[0]
 branch_2 = branches[1]
