@@ -31,6 +31,10 @@ parser.add_argument('-r', '--remote', action='store_true',
                     default=False, help='Get remote branches')
 parser.add_argument('-a', '--all', action='store_true',
                     default=False, help='Get all (local and remote) branches')
+parser.add_argument('-e', '--head', default=None, type=int,
+                    help='Show only first n lines')
+parser.add_argument('-t', '--tail', default=None, type=int,
+                    help='Show only last n lines')
 
 args = parser.parse_args()
 
@@ -52,6 +56,13 @@ for branch in branches:
         times_and_branches.append((time_diff_seconds, '%10s days: %s' % (time_diff_days, branch), ))
 
 times_and_branches.sort()
+
+if args.head:
+    head_lines = int(args.head)
+    times_and_branches = times_and_branches[:head_lines]
+if args.tail:
+    tail_lines = int(args.tail)
+    times_and_branches = times_and_branches[-tail_lines:]
 
 for _, branch in times_and_branches:
     print branch
