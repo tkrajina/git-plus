@@ -1,0 +1,57 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# Copyright 2013 Tomo Krajina
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import pdb
+
+import argparse as mod_argparse
+import time as mod_time
+
+import gitutils as mod_gitutils
+
+mod_gitutils.assert_in_git_repository()
+
+parser = mod_argparse.ArgumentParser(
+         description='Detectes (and possibly deletes) old unused branches')
+
+parser.add_argument('-r', '--remote', action='store_true',
+                    default=False, help='Get remote branches')
+parser.add_argument('-a', '--all', action='store_true',
+                    default=False, help='Get all (local and remote) branches')
+
+args = parser.parse_args()
+
+now = mod_time.time()
+
+times_and_branches = []
+
+branches = mod_gitutils.get_branches(args.remote, args.all)
+for branch in branches:
+    success, result = mod_gitutils.execute_git('log ' + branch + ' -1 --format=%at -- .', output=False)
+    assert success
+
+    if len(result.strip()) == 0:
+        print 'Cannot find the age of %s' % branch
+    else:
+        time_diff_seconds = int(now) - int(result)
+        time_diff_days = int((float(time_diff_seconds) / (60*60*24)) * 100) / 100.
+
+        times_and_branches.append((time_diff_seconds, '%10s days: %s' % (time_diff_days, branch), ))
+
+times_and_branches.sort()
+
+for _, branch in times_and_branches:
+    print branch
