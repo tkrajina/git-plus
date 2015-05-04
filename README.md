@@ -5,6 +5,7 @@ Git plus is a set of git utilities:
  * **git multi** execute a single git command on multiple git repositories
  * **git relation** show a relation between two branches/commits/tags
  * **git old-branches** find old/unused branches
+ * **git recent** find list of branches ordered by last commit time
 
 ## Git multi
 
@@ -138,11 +139,51 @@ Find and remove branches older than 10 days:
 
 Note that branches will not be removed unconditionally, you'll be asked once to confirm the deletion.
 
+## Git recent
+
+Old-branches can detect old/unused branches.
+
+Find local branches older than 10 days:
+
+    $ git old-branches -d 10
+
+Find remote branches older than 60 days:
+
+    $ git old-branches -r -d 10
+
+Find local and remote branches older than 120 days:
+
+    $ git old-branches -a -d 10
+
+Find and remove branches older than 10 days:
+
+    $ git old-branches -d 10 --delete
+    Branch old-branch is older than 10 days (13.89)!
+    Remove [yes/N] ?
+
+Note that branches will not be removed unconditionally, you'll be asked once to confirm the deletion.
+
 # Installation
 
-Add this directory to your $PATH:
+Find list of branches ordered by last commit time:
 
-    export PATH=$PATH:/path/to/git-plus
+    git recent
+
+Show only remote branches:
+
+    git recent -r
+
+Show all branches (local and remote)
+
+    git recent -a
+
+Show only **last** 10 branches:
+
+    git recent --tail=10
+
+Show only **first** 15 branches:
+
+    git recent --head=15
 
 License
 -------
