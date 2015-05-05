@@ -5,7 +5,7 @@ Git plus is a set of git utilities:
  * **git multi** execute a single git command on multiple git repositories
  * **git relation** show a relation between two branches/commits/tags
  * **git old-branches** find old/unused branches
- * **git recent** find list of branches ordered by last commit time
+ * **git recent** list branches ordered by last commit time
 
 ## Git multi
 
@@ -179,11 +179,11 @@ Show all branches (local and remote)
 
 Show only **last** 10 branches:
 
-    git recent --tail=10
+    git recent --last=10
 
 Show only **first** 15 branches:
 
-    git recent --head=15
+    git recent --first=15
 
 License
 -------
