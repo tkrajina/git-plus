@@ -139,7 +139,7 @@ Find and remove branches older than 10 days:
 
 Note that branches will not be removed unconditionally, you'll be asked once to confirm the deletion.
 
-## Git recent
+## Git old-branches
 
 Old-branches can detect old/unused branches.
 
@@ -163,7 +163,7 @@ Find and remove branches older than 10 days:
 
 Note that branches will not be removed unconditionally, you'll be asked once to confirm the deletion.
 
-# Installation
+# Git recent
 
 Find list of branches ordered by last commit time:
 
@@ -185,7 +185,11 @@ Show only **first** 15 branches:
 
     git recent --first=15
 
-License
--------
+# Installation
+
+Add this directory to your $PATH:
+    export PATH=$PATH:/path/to/git-plus
+
+# License
 
 Git plus is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
