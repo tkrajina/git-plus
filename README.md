@@ -139,30 +139,6 @@ Find and remove branches older than 10 days:
 
 Note that branches will not be removed unconditionally, you'll be asked once to confirm the deletion.
 
-## Git old-branches
-
-Old-branches can detect old/unused branches.
-
-Find local branches older than 10 days:
-
-    $ git old-branches -d 10
-
-Find remote branches older than 60 days:
-
-    $ git old-branches -r -d 10
-
-Find local and remote branches older than 120 days:
-
-    $ git old-branches -a -d 10
-
-Find and remove branches older than 10 days:
-
-    $ git old-branches -d 10 --delete
-    Branch old-branch is older than 10 days (13.89)!
-    Remove [yes/N] ?
-
-Note that branches will not be removed unconditionally, you'll be asked once to confirm the deletion.
-
 # Git recent
 
 Find list of branches ordered by last commit time:
