@@ -17,6 +17,7 @@
 
 import pdb
 
+import sys as mod_sys
 import argparse as mod_argparse
 import time as mod_time
 
@@ -44,10 +45,13 @@ times_and_branches = []
 
 branches = mod_gitutils.get_branches(args.remote, args.all)
 for branch in branches:
-    success, result = mod_gitutils.execute_git('log ' + branch + ' -1 --format=%at', output=False)
-    assert success
+    cmd = 'log ' + branch + ' -1 --format=%at'
+    success, result = mod_gitutils.execute_git(cmd, output=False)
+    if not success:
+        mod_sys.stderr.write(cmd)
+        mod_sys.stderr.write(result)
 
-    if len(result.strip()) == 0:
+    if (not success) or (len(result.strip()) == 0):
         print 'Cannot find the age of %s' % branch
     else:
         time_diff_seconds = int(now) - int(result)
