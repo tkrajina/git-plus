@@ -155,11 +155,11 @@ Show all branches (local and remote)
 
 Show only **last** 10 branches:
 
-    git recent --last=10
+    git recent -10
 
 Show only **first** 15 branches:
 
-    git recent --first=15
+    git recent 15
 
 # Installation
 
