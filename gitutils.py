@@ -65,7 +65,9 @@ def get_branches(remote=False, all=False, merged=None, no_merged=None):
         return branch.strip()
 
     lines = result.strip().split('\n')
-    return map(_filter_branch, lines)
+    result = map(_filter_branch, lines)
+    result = filter(lambda x : x, result)
+    return result
 
 def delete_branch(branch, force=False):
     if '/' in branch:
