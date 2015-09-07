@@ -32,6 +32,10 @@ parser.add_argument('-r', '--remote', action='store_true',
                     default=False, help='Get remote branches')
 parser.add_argument('-a', '--all', action='store_true',
                     default=False, help='Get all (local and remote) branches')
+parser.add_argument('--no-merged', action='store_true',
+                    default=False, help='Only *not* merged branches')
+parser.add_argument('--merged', action='store_true',
+                    default=False, help='Only merged branches')
 parser.add_argument('entries', metavar='entries', type=int, default=1000, nargs='?',
                     help='Number of entries (negative number if you want the last N entries)')
 
@@ -41,7 +45,7 @@ now = mod_time.time()
 
 times_and_branches = []
 
-branches = mod_gitutils.get_branches(args.remote, args.all)
+branches = mod_gitutils.get_branches(args.remote, merged=args.merged, no_merged=args.no_merged, all=args.all)
 for branch in branches:
     cmd = 'log ' + branch + ' -1 --format=%at'
     success, result = mod_gitutils.execute_git(cmd, output=False)

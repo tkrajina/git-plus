@@ -38,13 +38,20 @@ def execute_command(command, output=True, prefix='', grep=None):
 def execute_git(command, output=True, prefix='', grep=None):
     return execute_command('git %s' % command, output, prefix, grep)
 
-def get_branches(remote=False, all=False):
+def get_branches(remote=False, all=False, merged=None, no_merged=None):
     git_command = 'branch'
+
     if remote:
         git_command += ' -r'
     if all:
         git_command += ' -a'
+    if merged is True:
+        git_command += ' --merged'
+    if no_merged is True:
+        git_command += ' --no-merged'
+
     success, result = execute_git(git_command, output=False)
+
     assert success
     assert result
 
