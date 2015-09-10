@@ -7,6 +7,20 @@ Git plus is a set of git utilities:
  * **git old-branches** find old/unused branches
  * **git recent** list branches ordered by last commit time
 
+## Installation
+
+Add this directory to your $PATH:
+
+    export PATH=$PATH:/path/to/git-plus
+
+On OSX using brew:
+
+    brew install git-plus
+
+Or using pip:
+
+    pip install git-plus
+
 ## Git multi
 
 If you have repositories ~/projects/repository1, ~/projects/repository2, ~/projects/repository3, ~/projects/repository4, ... First go to:
@@ -160,11 +174,6 @@ Show only **last** 10 branches:
 Show only **first** 15 branches:
 
     git recent 15
-
-# Installation
-
-Add this directory to your $PATH:
-    export PATH=$PATH:/path/to/git-plus
 
 # License
 
