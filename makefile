@@ -14,4 +14,5 @@ ctags:
 	ctags -R .
 clean:
 	rm -Rf build
-	rm -v -- $(shell find . -name "*.pyc")
+	rm -Rf dist
+	rm -Rf MANIFEST
