@@ -25,7 +25,7 @@ import gitutils as mod_gitutils
 mod_gitutils.assert_in_git_repository()
 
 parser = mod_argparse.ArgumentParser(
-         description='Detectes (and possibly deletes) old unused branches')
+         description='Detects (and possibly deletes) old unused branches')
 
 parser.add_argument('-r', '--remote', action='store_true',
                     default=False, help='Get remote branches')
@@ -34,7 +34,7 @@ parser.add_argument('-a', '--all', action='store_true',
 parser.add_argument('-d', '--days', default=180, type=int,
                     help='How many days old must a branch be')
 parser.add_argument('--delete', action='store_true', default=False,
-                    help='Remove branches older than ... days (you\ll be asked to confirm the deletion)')
+                    help='Remove branches older than ... days (you\'ll be asked to confirm the deletion)')
 
 args = parser.parse_args()
 
