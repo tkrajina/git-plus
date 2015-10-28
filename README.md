@@ -139,11 +139,11 @@ Find local branches older than 10 days:
 
 Find remote branches older than 60 days:
 
-    $ git old-branches -r -d 10
+    $ git old-branches -r -d 60
 
 Find local and remote branches older than 120 days:
 
-    $ git old-branches -a -d 10
+    $ git old-branches -a -d 120
 
 Find and remove branches older than 10 days:
 
