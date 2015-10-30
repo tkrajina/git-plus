@@ -15,8 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pdb
-
 import sys as mod_sys
 import argparse as mod_argparse
 import time as mod_time
@@ -26,7 +24,7 @@ import gitutils as mod_gitutils
 mod_gitutils.assert_in_git_repository()
 
 parser = mod_argparse.ArgumentParser(
-         description='Show list of branches sorted by last commit time')
+    description='Show list of branches sorted by last commit time')
 
 parser.add_argument('-r', '--remote', action='store_true',
                     default=False, help='Get remote branches')

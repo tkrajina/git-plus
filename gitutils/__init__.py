@@ -1,18 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import pdb
-
-import os as mod_os
 import os.path as mod_path
 import sys as mod_sys
 import subprocess
+
 
 def assert_in_git_repository():
     success, lines = execute_git('status', output=False)
     if not success:
         print 'Not a git repository!!!'
         mod_sys.exit(1)
+
 
 def execute_command(command, output=True, prefix='', grep=None):
     result = ''
@@ -35,8 +34,10 @@ def execute_command(command, output=True, prefix='', grep=None):
 
     return (not p.returncode, result)
 
+
 def execute_git(command, output=True, prefix='', grep=None):
     return execute_command('git %s' % command, output, prefix, grep)
+
 
 def get_branches(remote=False, all=False, merged=None, no_merged=None):
     git_command = 'branch'
@@ -66,8 +67,9 @@ def get_branches(remote=False, all=False, merged=None, no_merged=None):
 
     lines = result.strip().split('\n')
     result = map(_filter_branch, lines)
-    result = filter(lambda x : x, result)
+    result = filter(lambda x: x, result)
     return result
+
 
 def delete_branch(branch, force=False):
     if '/' in branch:
@@ -82,6 +84,7 @@ def delete_branch(branch, force=False):
     else:
         execute_git('branch %s %s' % ('-D' if force else '-d', branch))
 
+
 def get_config_properties():
     executed, output = execute_git('config -l', output=False)
 
@@ -90,20 +93,20 @@ def get_config_properties():
         mod_sys.exit(1)
 
     result = {}
-	
+
     lines = output.split('\n')
     for line in lines:
         if '=' in line:
             pos = line.find('=')
-            key = line[0 : pos].strip().lower()
-            value = line[pos + 1 :].strip()
+            key = line[0: pos].strip().lower()
+            value = line[pos + 1:].strip()
             result[key] = value
-	
+
     return result
+
 
 def is_changed():
     """ Checks if current project has any noncommited changes. """
     executed, changed_lines = execute_git('status --porcelain', output=False)
     merge_not_finished = mod_path.exists('.git/MERGE_HEAD')
     return changed_lines or merge_not_finished
-
