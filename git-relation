@@ -19,9 +19,6 @@
 Show a relation between two git commits/tags/branches.
 """
 
-import pdb
-
-import os as mod_os
 import sys as mod_sys
 
 import gitutils as mod_gitutils
@@ -41,6 +38,7 @@ if len(branches) != 2:
     print 'Two branches expected, got %s' % branches
     mod_sys.exit(1)
 
+
 def get_git_sha1(branch_name):
     success, sha1 = mod_gitutils.execute_git('log -1 %s --format=%%H' % branch_name,
                                              output=False)
@@ -49,10 +47,11 @@ def get_git_sha1(branch_name):
         mod_sys.exit(1)
     return sha1.strip()
 
+
 def print_log(commit_1, commit_2):
     success, log = mod_gitutils.execute_git(
-            'log %s..%s --format=%%x20%%x20%%x20%%h%%x20%%Cgreen%%an%%Creset%%x20\"%%Cred%%s%%Creset\",%%x20%%ar' % (commit_1, commit_2),
-            output=False)
+        'log %s..%s --format=%%x20%%x20%%x20%%h%%x20%%Cgreen%%an%%Creset%%x20\"%%Cred%%s%%Creset\",%%x20%%ar' % (commit_1, commit_2),
+        output=False)
     if not success:
         print 'Error retrieving log %s..%s' % (commit_1, commit_2)
         mod_sys.exit(1)
