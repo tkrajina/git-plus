@@ -59,7 +59,7 @@ def print_log(commit_1, commit_2):
 
     lines = result.split('\n')
 
-    print '%s commits from \033[1;34m%s\033[1;m to \033[1;34m%s\033[1;m:' % (len(lines), commit_1, commit_2)
+    print '%s commits from \033[1;34m%s\033[0m to \033[1;34m%s\033[0m:' % (len(lines), commit_1, commit_2)
 
     if len(lines) < 30:
         print result
@@ -86,17 +86,17 @@ if not success:
     mod_sys.exit(1)
 
 elif merge_base == branch_1_sha1 and merge_base == branch_2_sha1:
-    print '\033[1;34m%s\033[1;m \033[1;31mEQUALS\033[1;m \033[1;34m%s\033[1;m' % (branch_1, branch_2)
+    print '\033[1;34m%s\033[0m \033[1;31mEQUALS\033[0m \033[1;34m%s\033[0m' % (branch_1, branch_2)
 elif merge_base == branch_1_sha1:
-    print '\033[1;34m%s\033[1;m is \033[1;31mBEHIND\033[1;m \033[1;34m%s\033[1;m' % (branch_1, branch_2)
+    print '\033[1;34m%s\033[0m is \033[1;31mBEHIND\033[0m \033[1;34m%s\033[0m' % (branch_1, branch_2)
     print
     print_log(branch_1, branch_2)
 elif merge_base == branch_2_sha1:
-    print '\033[1;34m%s\033[1;m is \033[1;31mAHEAD\033[1;m of \033[1;34m%s\033[1;m' % (branch_1, branch_2)
+    print '\033[1;34m%s\033[0m is \033[1;31mAHEAD\033[0m of \033[1;34m%s\033[0m' % (branch_1, branch_2)
     print
     print_log(branch_2, branch_1)
 else:
-    print '\033[1;34m%s\033[1;m and %s \033[1;31mDIVERGED\033[1;m, common point is \033[1;34m%s\033[1;m' % (branch_1, branch_2, merge_base)
+    print '\033[1;34m%s\033[0m and %s \033[1;31mDIVERGED\033[0m, common point is \033[1;34m%s\033[0m' % (branch_1, branch_2, merge_base)
     print
     print_log(merge_base, branch_1)
     print
