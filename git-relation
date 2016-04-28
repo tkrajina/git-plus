@@ -89,7 +89,7 @@ elif merge_base == branch_2_sha1:
     print
     print_log(branch_2, branch_1)
 else:
-    print '\033[1;34m%s\033[0m and %s \033[1;31mDIVERGED\033[0m, common point is \033[1;34m%s\033[0m' % (branch_1, branch_2, merge_base)
+    print '\033[1;34m%s\033[0m and \033[1;34m%s\033[0m \033[1;31mDIVERGED\033[0m, common point is \033[1;34m%s\033[0m' % (branch_1, branch_2, merge_base)
     print
     print_log(merge_base, branch_1)
     print
