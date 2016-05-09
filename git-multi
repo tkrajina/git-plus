@@ -63,11 +63,11 @@ def has_arg(args, short_name, long_name):
 
 
 def is_ignored(project):
-    return file_name in ignore_projects
+    return project in ignore_projects
 
 
 def process_project(current_path, file_name):
-    if is_ignored(file_name in ignore_projects):
+    if is_ignored(file_name):
         return
 
     dir_path = '%s/%s' % (current_path, file_name)
