@@ -21,10 +21,10 @@ def execute_command(command, output=True, prefix='', grep=None):
 
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=-1)
     (cmdout, cmderr) = p.communicate()
-    if cmdout is None:
-        return (0, "")
+    if cmdout is None or not cmdout.strip():
+        return (p.returncode, cmdout.strip())
 
-    for line in cmdout.split('\n'):
+    for line in cmdout.strip().split('\n'):
         output_line = prefix + ('%s' % line).rstrip() + '\n'
         if not grep or grep in output_line:
             if output and output_line:
