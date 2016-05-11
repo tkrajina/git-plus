@@ -55,7 +55,8 @@ With:
 
     git multi -a
 
-A .tar archive named git-repositories-yyyy-mm-dd-hh-mm.tar with all repositories in this directory (i.e. their .git directories) will be created.
+A .tar archive named git-repositories-yyyy-mm-dd-hh-mm.tar.xz with all
+repositories in this directory (i.e. their .git directories) will be created.
 
 ### Group by output
 
