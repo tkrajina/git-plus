@@ -145,9 +145,28 @@ def get_project_list_from_manifest(manifest, ignore_list):
     return projects
 
 
+def get_project_list_from_config(config, ignore_dirs):
+    projects = []
+    with open(config) as cfg:
+        for line in cfg:
+            path = line.strip()
+
+            if path and mod_path.isdir(path):
+                if ignore_dirs and path in ignore_dirs:
+                    continue
+
+                if mod_path.exists('%s/.git' % path):
+                    projects.append(path)
+    return projects
+
+
 def get_project_list(ignore_list=None):
     manifest = '.repo/manifest.xml'
-    if mod_path.exists(manifest):
+    config = '../.gitmulti'
+    if mod_path.exists(config):
+        print '## Using project list from .gitmulti config file.'
+        return get_project_list_from_config(config, ignore_dirs)
+    elif mod_path.exists(manifest):
         print '## Using project list from repo manifest.'
         return get_project_list_from_manifest(manifest, ignore_list)
     else:
