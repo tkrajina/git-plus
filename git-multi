@@ -67,18 +67,6 @@ def is_ignored(project):
     return project in ignore_projects
 
 
-def get_project_list(ignore_list=None):
-    projects = []
-    for file_name in mod_os.listdir('.'):
-        if mod_path.isdir(file_name):
-            if ignore_list and file_name in ignore_list:
-                continue
-
-            if mod_path.exists('%s/.git' % file_name):
-                projects.append (file_name)
-    return projects
-
-
 def process_project(current_path, file_name):
     if is_ignored(file_name):
         return
@@ -187,7 +175,7 @@ if backup:
     now = now.strftime('%Y-%m-%d-%H-%M')
     tar_name = 'git-repositories-%s.tar.xz' % (now)
 
-    repos = get_project_list ()
+    repos = mod_gitutils.get_project_list()
 
     dot_gitignores = []
     for repo in repos:

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import os as mod_os
 import os.path as mod_path
 import sys as mod_sys
 import subprocess
@@ -110,3 +111,15 @@ def is_changed():
     executed, changed_lines = execute_git(['status', '--porcelain'], output=False)
     merge_not_finished = mod_path.exists('.git/MERGE_HEAD')
     return changed_lines or merge_not_finished
+
+
+def get_project_list(ignore_list=None):
+    projects = []
+    for file_name in mod_os.listdir('.'):
+        if mod_path.isdir(file_name):
+            if ignore_list and file_name in ignore_list:
+                continue
+
+            if mod_path.exists('%s/.git' % file_name):
+                projects.append (file_name)
+    return projects
