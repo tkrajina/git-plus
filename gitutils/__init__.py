@@ -5,6 +5,7 @@ import os as mod_os
 import os.path as mod_path
 import sys as mod_sys
 import subprocess
+import xml.etree.ElementTree as mod_et
 
 
 def assert_in_git_repository():
@@ -113,7 +114,7 @@ def is_changed():
     return changed_lines or merge_not_finished
 
 
-def get_project_list(ignore_list=None):
+def get_project_list_from_search(ignore_list=None):
     projects = []
     for file_name in mod_os.listdir('.'):
         if mod_path.isdir(file_name):
@@ -123,3 +124,32 @@ def get_project_list(ignore_list=None):
             if mod_path.exists('%s/.git' % file_name):
                 projects.append (file_name)
     return projects
+
+
+def get_project_list_from_manifest(manifest, ignore_list):
+    projects = []
+    tree = mod_et.parse(manifest)
+    root = tree.getroot()
+
+    for prj in root.iter('project'):
+        path = prj.attrib.get('path', None)
+        if not path:
+            continue
+
+        if mod_path.isdir(path):
+            if ignore_list and path in ignore_list:
+                continue
+
+            if mod_path.exists('%s/.git' % path):
+                projects.append(path)
+    return projects
+
+
+def get_project_list(ignore_list=None):
+    manifest = '.repo/manifest.xml'
+    if mod_path.exists(manifest):
+        print '## Using project list from repo manifest.'
+        return get_project_list_from_manifest(manifest, ignore_list)
+    else:
+        print '## Using project list from directory search.'
+        return get_project_list_from_search(ignore_list)
