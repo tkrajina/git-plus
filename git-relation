@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # Copyright 2013 Tomo Krajina
@@ -38,7 +38,7 @@ branch_1 = args.branch_1
 branch_2 = args.branch_2
 
 def get_git_sha1(branch_name):
-    success, sha1 = mod_gitutils.execute_git('log -1 %s --format=%%H' % branch_name,
+    success, sha1 = mod_gitutils.execute_git(['log', '-1', branch_name, '--format=%H'],
                                              output=False)
     if not success:
         print 'Invalid branch %s' % branch_name
@@ -48,7 +48,11 @@ def get_git_sha1(branch_name):
 
 def print_log(commit_1, commit_2):
     success, log = mod_gitutils.execute_git(
-        'log %s..%s --format=%%x20%%x20%%x20%%h%%x20%%Cgreen%%an%%Creset%%x20\"%%Cred%%s%%Creset\",%%x20%%ar' % (commit_1, commit_2),
+        [
+            'log',
+            '%s..%s' % (commit_1, commit_2),
+            '--format=%x20%x20%x20%h%x20%Cgreen%an%Creset%x20\"%Cred%s%Creset\",%x20%ar'
+        ],
         output=False)
     if not success:
         print 'Error retrieving log %s..%s' % (commit_1, commit_2)
@@ -83,7 +87,7 @@ def distance_to_commit(commit_1, commit_2):
 branch_1_sha1 = get_git_sha1(branch_1)
 branch_2_sha1 = get_git_sha1(branch_2)
 
-success, merge_base = mod_gitutils.execute_git('merge-base %s %s' % (branch_1, branch_2),
+success, merge_base = mod_gitutils.execute_git(['merge-base', branch_1, branch_2],
                                                output=False)
 merge_base = merge_base.strip()
 if not success:

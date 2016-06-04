@@ -39,9 +39,17 @@ Execute "git gui" only on repositories which contain some changes:
 
     git multi -c gui
 
+Make the output quiet - do not show any output for repositories with no changes:
+
+    git multi -q status
+
 Switch to "master" for all repositories:
 
     git multi checkout master
+
+Show all repositories that are not on the specified branch
+
+    git multi -B <branch name>
 
 Create a "test" branch on all repositories and checkout it immediately:
 
@@ -55,7 +63,8 @@ With:
 
     git multi -a
 
-A .tar archive named git-repositories-yyyy-mm-dd-hh-mm.tar with all repositories in this directory (i.e. their .git directories) will be created.
+A .tar archive named git-repositories-yyyy-mm-dd-hh-mm.tar.xz with all
+repositories in this directory (i.e. their .git directories) will be created.
 
 ### Group by output
 
