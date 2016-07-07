@@ -16,3 +16,5 @@ clean:
 	rm -Rf build
 	rm -Rf dist
 	rm -Rf MANIFEST
+pyflakes:
+	pyflakes $(grep -r -l "/usr/bin/python" * */*) $(find . -name "*py")
