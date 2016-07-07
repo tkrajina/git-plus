@@ -38,7 +38,7 @@ branch_1 = args.branch_1
 branch_2 = args.branch_2
 
 def get_git_sha1(branch_name):
-    success, sha1 = mod_gitutils.execute_git('log -1 %s --format=%%H' % branch_name,
+    success, sha1 = mod_gitutils.execute_git('log -1 %s --format=%%H --' % branch_name,
                                              output=False)
     if not success:
         print 'Invalid branch %s' % branch_name

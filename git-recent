@@ -45,7 +45,7 @@ times_and_branches = []
 
 branches = mod_gitutils.get_branches(args.remote, merged=args.merged, no_merged=args.no_merged, all=args.all)
 for branch in branches:
-    cmd = 'log ' + branch + ' -1 --format=%at'
+    cmd = 'log ' + branch + ' -1 --format=%at --'
     success, result = mod_gitutils.execute_git(cmd, output=False)
     if not success:
         mod_sys.stderr.write(cmd)

@@ -40,8 +40,12 @@ now = mod_time.time()
 
 branches = mod_gitutils.get_branches(args.remote, args.all)
 for branch in branches:
-    success, result = mod_gitutils.execute_git('log ' + branch + ' -1 --format=%at', output=False)
-    assert success
+    command = 'log ' + branch + ' -1 --format=%at --'
+    success, result = mod_gitutils.execute_git(command, output=False)
+    if not success:
+        mod_sys.stderr.write(command)
+        mod_sys.stderr.write(result)
+        mod_sys.exit(1)
 
     if len(result.strip()) == 0:
         print 'Cannot find the age of %s' % branch
