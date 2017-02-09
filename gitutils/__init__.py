@@ -109,4 +109,4 @@ def is_changed():
     """ Checks if current project has any noncommited changes. """
     executed, changed_lines = execute_git('status --porcelain', output=False)
     merge_not_finished = mod_path.exists('.git/MERGE_HEAD')
-    return changed_lines or merge_not_finished
+    return changed_lines.strip() or merge_not_finished
