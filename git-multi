@@ -96,7 +96,7 @@ def process_project(current_path, file_name):
         result = result.rstrip()
 
         if not executed:
-            output = '\tError executing:%s' % git_command
+            output = '\tError executing:%s:%s' % (git_command, result)
         elif result:
             output = result
         else:
