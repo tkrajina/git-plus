@@ -100,7 +100,7 @@ Or reset to default with:
 
 Git relation gives you the relation between two commits/branches/tags. For example:
 
-    get relation master test-branch
+    git relation master test-branch
 
 ...will tell you if two branches are equals, or if master is AHEAD of test-branch or if master is BEHIND test-branch or if they diverged in some commit in history.
 
