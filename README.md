@@ -57,6 +57,12 @@ With:
 
 A .tar archive named git-repositories-yyyy-mm-dd-hh-mm.tar with all repositories in this directory (i.e. their .git directories) will be created.
 
+If you have a nested structure of repositories, e.g. ~/project1/repository1, ~/project1/repository2, ~/project2/repository3, use
+    
+    git multi -d 2
+
+... or a different number to look for git repositories up to the specified depth.
+
 ### Group by output
 
 If you have many projects with same git commant output, for example:
