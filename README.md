@@ -135,6 +135,10 @@ Another example:
       1d3b97c Tomo Krajina Preparations for marker handler, 3 weeks ago
       9546769 Tomo Krajina Removed all subscription stuff, 3 months ago
 
+By default, `git-rel` shows no more than 30 commits (if there are more some will be omitted). You can show the list of all commits with:
+
+    $ git relation -a branch-1 branch-2
+
 ## Git old-branches
 
 Old-branches can detect old/unused branches.
