@@ -65,7 +65,7 @@ If you have a nested structure of repositories, e.g. ~/project1/repository1, ~/p
 
 ### Group by output
 
-If you have many projects with same git commant output, for example:
+If you have many projects with same git command output, for example:
 
     git multi status
     
