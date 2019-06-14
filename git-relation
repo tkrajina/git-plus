@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
+
 import sys as mod_sys
 import argparse as mod_argparse
 
@@ -43,7 +45,7 @@ def get_git_sha1(branch_name):
     success, sha1 = mod_gitutils.execute_git('log -1 %s --format=%%H --' % branch_name,
                                              output=False)
     if not success:
-        print 'Invalid branch %s' % branch_name
+        print('Invalid branch %s' % branch_name)
         mod_sys.exit(1)
     return sha1.strip()
 
@@ -53,17 +55,17 @@ def print_log(commit_1, commit_2, all_commits=False):
         'log %s..%s --format=%%x20%%x20%%x20%%h%%x20%%Cgreen%%an%%Creset%%x20\"%%Cred%%s%%Creset\",%%x20%%ar' % (commit_1, commit_2),
         output=False)
     if not success:
-        print 'Error retrieving log %s..%s' % (commit_1, commit_2)
+        print('Error retrieving log %s..%s' % (commit_1, commit_2))
         mod_sys.exit(1)
     result = log.rstrip()
 
     lines = result.split('\n')
 
-    print
-    print '%s commits from \033[1;34m%s\033[0m to \033[1;34m%s\033[0m:' % (len(lines), commit_1, commit_2)
+    print()
+    print('%s commits from \033[1;34m%s\033[0m to \033[1;34m%s\033[0m:' % (len(lines), commit_1, commit_2))
 
     if all_commits or len(lines) < 30:
-        print result
+        print(result)
         return
 
     first = lines[:10]
@@ -71,14 +73,14 @@ def print_log(commit_1, commit_2, all_commits=False):
 
     lines = first + ['   ...%s more commits...' % (len(lines) - len(first) - len(last))] + last
 
-    print '\n'.join(lines)
+    print('\n'.join(lines))
 
 def distance_to_commit(commit_1, commit_2):
     success, log = mod_gitutils.execute_git(
         'rev-list %s..%s --count' % (commit_1, commit_2),
         output=False)
     if not success:
-        print 'Error calculating distance between %s..%s' % (commit_1, commit_2)
+        print('Error calculating distance between %s..%s' % (commit_1, commit_2))
         mod_sys.exit(1)
     return int(log)
 
@@ -89,22 +91,22 @@ success, merge_base = mod_gitutils.execute_git('merge-base %s %s' % (branch_1, b
                                                output=False)
 merge_base = merge_base.strip()
 if not success:
-    print 'Can\'t find merge base for %s and %s' % (branch_1, branch_2)
+    print('Can\'t find merge base for %s and %s' % (branch_1, branch_2))
     mod_sys.exit(1)
 
 elif merge_base == branch_1_sha1 and merge_base == branch_2_sha1:
-    print '\033[1;34m%s\033[0m \033[1;31mEQUALS\033[0m \033[1;34m%s\033[0m' % (branch_1, branch_2)
+    print('\033[1;34m%s\033[0m \033[1;31mEQUALS\033[0m \033[1;34m%s\033[0m' % (branch_1, branch_2))
 elif merge_base == branch_1_sha1:
-    print '\033[1;34m%s\033[0m is \033[1;31mBEHIND\033[0m \033[1;34m%s\033[0m by %d commits' % (branch_1, branch_2, distance_to_commit(branch_1, branch_2))
+    print('\033[1;34m%s\033[0m is \033[1;31mBEHIND\033[0m \033[1;34m%s\033[0m by %d commits' % (branch_1, branch_2, distance_to_commit(branch_1, branch_2)))
     if not args.brief:
         print_log(branch_1, branch_2, args.all)
 elif merge_base == branch_2_sha1:
-    print '\033[1;34m%s\033[0m is \033[1;31mAHEAD\033[0m of \033[1;34m%s\033[0m by %d commits' % (branch_1, branch_2, distance_to_commit(branch_2, branch_1))
+    print('\033[1;34m%s\033[0m is \033[1;31mAHEAD\033[0m of \033[1;34m%s\033[0m by %d commits' % (branch_1, branch_2, distance_to_commit(branch_2, branch_1)))
     if not args.brief:
         print_log(branch_2, branch_1, args.all)
 else:
-    print '\033[1;34m%s\033[0m and \033[1;34m%s\033[0m \033[1;31mDIVERGED\033[0m by respectively %d and %d commits' % (branch_1, branch_2, distance_to_commit(merge_base, branch_1), distance_to_commit(merge_base, branch_2))
+    print('\033[1;34m%s\033[0m and \033[1;34m%s\033[0m \033[1;31mDIVERGED\033[0m by respectively %d and %d commits' % (branch_1, branch_2, distance_to_commit(merge_base, branch_1), distance_to_commit(merge_base, branch_2)))
     if not args.brief:
-        print 'common point is \033[1;34m%s\033[0m'%(merge_base)
+        print('common point is \033[1;34m%s\033[0m'%(merge_base))
         print_log(merge_base, branch_1, args.all)
         print_log(merge_base, branch_2, args.all)

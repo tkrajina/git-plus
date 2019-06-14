@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+
 import os.path as mod_path
 import sys as mod_sys
 import subprocess
@@ -9,7 +11,7 @@ import subprocess
 def assert_in_git_repository():
     success, lines = execute_git('status', output=False)
     if not success:
-        print 'Not a git repository!!!'
+        print('Not a git repository!!!')
         mod_sys.exit(1)
 
 
@@ -24,11 +26,11 @@ def execute_command(command, output=True, prefix='', grep=None):
     if cmdout is None:
         return (0, "")
 
-    for line in cmdout.split('\n'):
+    for line in cmdout.decode('utf-8').split('\n'):
         output_line = prefix + ('%s' % line).rstrip() + '\n'
         if not grep or grep in output_line:
             if output and output_line:
-                print output_line.rstrip()
+                print(output_line.rstrip())
                 mod_sys.stdout.flush()
             result += output_line
 
@@ -66,8 +68,8 @@ def get_branches(remote=False, all=False, merged=None, no_merged=None):
         return branch.strip()
 
     lines = result.strip().split('\n')
-    result = map(_filter_branch, lines)
-    result = filter(lambda x: x, result)
+    result = list(map(_filter_branch, lines))
+    result = [x for x in result if x]
     return result
 
 
@@ -80,7 +82,7 @@ def delete_branch(branch, force=False):
             origin_name, branch_name = parts
             execute_git('push %s :%s' % (origin_name, branch_name))
         else:
-            print 'Don\'t know how to delete %s' % branch
+            print('Don\'t know how to delete %s' % branch)
     else:
         execute_git('branch %s %s' % ('-D' if force else '-d', branch))
 
@@ -89,7 +91,7 @@ def get_config_properties():
     executed, output = execute_git('config -l', output=False)
 
     if not executed:
-        print 'Error retrieving git config properties'
+        print('Error retrieving git config properties')
         mod_sys.exit(1)
 
     result = {}
