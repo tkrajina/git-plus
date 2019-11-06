@@ -9,7 +9,7 @@ check-all-commited:
 	fi
 pypi-upload: check-all-commited
 	python setup.py register
-	python setup.py sdist upload
+	twine upload dist/*
 ctags:
 	ctags -R .
 clean:
