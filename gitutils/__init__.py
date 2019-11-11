@@ -74,12 +74,12 @@ def get_branches(remote=False, all=False, merged=None, no_merged=None):
 
 
 def delete_branch(branch, force=False):
-    if '/' in branch:
+    if branch.startswith('remotes/'):
         if branch.startswith('remotes/'):
             branch = branch.replace('remotes/', '')
         parts = branch.split('/')
-        if len(parts) == 2:
-            origin_name, branch_name = parts
+        if len(parts) >= 2:
+            origin_name, branch_name = parts[0], "/".join(parts[1:])
             execute_git('push %s :%s' % (origin_name, branch_name))
         else:
             print('Don\'t know how to delete %s' % branch)
