@@ -22,6 +22,8 @@ import datetime as mod_datetime
 
 import gitutils as mod_gitutils
 
+from typing import *
+
 # Prefix for git command output:
 PREFIX = '\t'
 
@@ -34,7 +36,7 @@ group_by_output = True
 only_if_changed = False
 
 
-def get_arg(args, short_name, long_name):
+def get_arg(args: List[str], short_name: str, long_name: str) -> Optional[str]:
     for i in range(len(args)):
         arg = args[i]
         if arg[0] != '-':
@@ -50,7 +52,7 @@ def get_arg(args, short_name, long_name):
     return None
 
 
-def has_arg(args, short_name, long_name):
+def has_arg(args: List[str], short_name: str, long_name: str) -> bool:
     for arg in args:
         if arg[0] != '-':
             return False
@@ -60,11 +62,11 @@ def has_arg(args, short_name, long_name):
     return False
 
 
-def is_ignored(project):
+def is_ignored(project: str) -> bool:
     return project in ignore_projects
 
 
-def process_dir(dirname, depth):
+def process_dir(dirname: str, depth: int) -> None:
     abs_dir_name = mod_os.path.abspath(dirname)
     for file_name in mod_os.listdir(dirname):
         if not single_project or single_project == file_name:
@@ -81,7 +83,7 @@ def process_dir(dirname, depth):
                     process_dir(mod_os.path.join(abs_dir_name, file_name), depth - 1)
 
 
-def process_project(current_path, file_name):
+def process_project(current_path: str, file_name: str) -> None:
     if is_ignored(file_name):
         return
 
@@ -175,8 +177,7 @@ if mod_path.exists('.multigit_ignore'):
 
 # Execute backup?
 if backup:
-    now = mod_datetime.datetime.now()
-    now = now.strftime('%Y-%m-%d-%H-%M')
+    now = mod_datetime.datetime.now().strftime('%Y-%m-%d-%H-%M')
     tar_name = 'git-repositories-%s.tar' % (now)
 
     executed, output = mod_gitutils.execute_command('tar cvf %s */.git */.gitignore' % tar_name, output=True)
@@ -213,7 +214,7 @@ else:
 print('--------------------------------------------------------------------------------')
 
 # Used when group_by_output == True, keys are output, values are a list of projects
-outputs = {}
+outputs: Dict[str, List[str]] = {}
 
 if show_progress and group_by_output:
     print('Progress:', end=' ')

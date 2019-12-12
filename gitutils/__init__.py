@@ -7,19 +7,19 @@ import os.path as mod_path
 import sys as mod_sys
 import subprocess
 
+from typing import *
 
-def assert_in_git_repository():
+def assert_in_git_repository() -> None:
     success, lines = execute_git('status', output=False)
     if not success:
         print('Not a git repository!!!')
         mod_sys.exit(1)
 
 
-def execute_command(command, output=True, prefix='', grep=None):
+def execute_command(cmd: Union[str, List[str]], output: bool=True, prefix: str='', grep: Optional[str]=None) -> Tuple[bool, str]:
     result = ''
 
-    if type(command) is not list:
-        command = command.split(' ')
+    command = cmd if type(cmd) is list else cmd.split(' ') # type: ignore
 
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=-1)
     (cmdout, cmderr) = p.communicate()
@@ -37,11 +37,11 @@ def execute_command(command, output=True, prefix='', grep=None):
     return (not p.returncode, result)
 
 
-def execute_git(command, output=True, prefix='', grep=None):
+def execute_git(command: str, output: bool=True, prefix: str='', grep: str="") -> Tuple[bool, str]:
     return execute_command('git %s' % command, output, prefix, grep)
 
 
-def get_branches(remote=False, all=False, merged=None, no_merged=None):
+def get_branches(remote: bool=False, all: bool=False, merged: bool=False, no_merged: bool=False) -> List[str]:
     git_command = 'branch'
 
     if remote:
@@ -58,7 +58,7 @@ def get_branches(remote=False, all=False, merged=None, no_merged=None):
     assert success
     assert result
 
-    def _filter_branch(branch):
+    def _filter_branch(branch: str) -> str:
         if '*' in branch:
             # Current branch:
             return branch.replace('*', '').strip()
@@ -68,12 +68,12 @@ def get_branches(remote=False, all=False, merged=None, no_merged=None):
         return branch.strip()
 
     lines = result.strip().split('\n')
-    result = list(map(_filter_branch, lines))
-    result = [x for x in result if x]
-    return result
+    lines = list(map(_filter_branch, lines))
+    lines = [line for line in lines if line]
+    return lines
 
 
-def delete_branch(branch, force=False):
+def delete_branch(branch: str, force: bool=False) -> None:
     if branch.startswith('remotes/'):
         if branch.startswith('remotes/'):
             branch = branch.replace('remotes/', '')
@@ -87,7 +87,7 @@ def delete_branch(branch, force=False):
         execute_git('branch %s %s' % ('-D' if force else '-d', branch))
 
 
-def get_config_properties():
+def get_config_properties() -> Dict[str, str]:
     executed, output = execute_git('config -l', output=False)
 
     if not executed:
@@ -107,8 +107,8 @@ def get_config_properties():
     return result
 
 
-def is_changed():
+def is_changed() -> bool:
     """ Checks if current project has any noncommited changes. """
     executed, changed_lines = execute_git('status --porcelain', output=False)
     merge_not_finished = mod_path.exists('.git/MERGE_HEAD')
-    return changed_lines.strip() or merge_not_finished
+    return cast(bool, changed_lines.strip() or merge_not_finished)

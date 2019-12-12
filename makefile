@@ -1,5 +1,13 @@
 GIT_PORCELAIN_STATUS=$(shell git status --porcelain)
 
+test: mypy
+	# At least make sure simple commands run without errors:
+	./git-multi status
+	./git-old-branches  -d -1
+	./git-recent
+	./git-relation HEAD HEAD~5
+mypy:
+	for script in $(shell ls git-*); do mypy --strict $$script; done
 check-all-commited:
 	if [ -n "$(GIT_PORCELAIN_STATUS)" ]; \
 	then \

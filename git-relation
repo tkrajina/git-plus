@@ -36,10 +36,10 @@ parser.add_argument('-a', '--all', action='store_true',
 
 args = parser.parse_args()
 
-branch_1 = args.branch_1
-branch_2 = args.branch_2
+branch_1: str = args.branch_1
+branch_2: str = args.branch_2
 
-def get_git_sha1(branch_name):
+def get_git_sha1(branch_name: str) -> str:
     success, sha1 = mod_gitutils.execute_git('log -1 %s --format=%%H --' % branch_name,
                                              output=False)
     if not success:
@@ -48,7 +48,7 @@ def get_git_sha1(branch_name):
     return sha1.strip()
 
 
-def print_log(commit_1, commit_2, all_commits=False):
+def print_log(commit_1: str, commit_2: str, all_commits: bool=False) -> None:
     success, log = mod_gitutils.execute_git(
         'log %s..%s --format=%%x20%%x20%%x20%%h%%x20%%Cgreen%%an%%Creset%%x20\"%%Cred%%s%%Creset\",%%x20%%ar' % (commit_1, commit_2),
         output=False)
@@ -73,7 +73,7 @@ def print_log(commit_1, commit_2, all_commits=False):
 
     print('\n'.join(lines))
 
-def distance_to_commit(commit_1, commit_2):
+def distance_to_commit(commit_1: str, commit_2: str) -> int:
     success, log = mod_gitutils.execute_git(
         'rev-list %s..%s --count' % (commit_1, commit_2),
         output=False)

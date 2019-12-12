@@ -1,4 +1,6 @@
 tags
+.mypy_cache/
+.vscode/
 
 # Vim Ignore files
 [._]*.s[a-w][a-z]
