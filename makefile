@@ -16,7 +16,8 @@ check-all-commited:
 	    exit 1; \
 	fi
 pypi-upload: check-all-commited
-	python setup.py register
+	rm -Rf dist/*
+	python setup.py sdist
 	twine upload dist/*
 ctags:
 	ctags -R .
