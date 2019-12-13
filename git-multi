@@ -13,14 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import print_function
-
 import sys as mod_sys
 import os as mod_os
 import os.path as mod_path
 import datetime as mod_datetime
 
 import gitutils as mod_gitutils
+import gitutils.utils as mod_utils
 
 from typing import *
 
@@ -34,32 +33,6 @@ group_by_output = True
 # -c switch in command line, if true execute only if project not changed (i.e.
 # the `git --porcelain` output is empty:
 only_if_changed = False
-
-
-def get_arg(args: List[str], short_name: str, long_name: str) -> Optional[str]:
-    for i in range(len(args)):
-        arg = args[i]
-        if arg[0] != '-':
-            return None
-        if arg.startswith('--%s=' % long_name):
-            args.remove(arg)
-            return arg.replace('--%s=' % long_name, '')
-        elif arg == '-%s' % short_name:
-            result = args[i + 1]
-            args.remove('-%s' % short_name)
-            args.remove(result)
-            return result
-    return None
-
-
-def has_arg(args: List[str], short_name: str, long_name: str) -> bool:
-    for arg in args:
-        if arg[0] != '-':
-            return False
-        if arg == '--%s' % long_name or arg == '-%s' % short_name:
-            args.remove(arg)
-            return True
-    return False
 
 
 def is_ignored(project: str) -> bool:
@@ -145,25 +118,25 @@ if group_by_output_config_key in config_properties:
             group_by_output = True
 
 # Check if to do backup of projects:
-backup = has_arg(args, 'a', 'archive')
+backup = mod_utils.has_arg(args, 'a', 'archive')
 
 # Check if needed to be executed on only one project:
-single_project = get_arg(args, 'p', 'project')
+single_project = mod_utils.get_arg(args, 'p', 'project')
 if single_project and single_project[-1] == '/':
     single_project = single_project[: -1]
 
 # Check projects which we don't need to be part of gut multi commands execution:
-except_projects = get_arg(args, 'e', 'except')
+except_projects = mod_utils.get_arg(args, 'e', 'except')
 
 # Check if to execute only on projects which contain some changes:
-only_if_changed = has_arg(args, 'c', 'changed')
+only_if_changed = mod_utils.has_arg(args, 'c', 'changed')
 
 # Output only the current branch for all projects:
-branch = has_arg(args, 'b', 'branch')
-branch_verbose = has_arg(args, 'bv', 'branch-verbose')
+branch = mod_utils.has_arg(args, 'b', 'branch')
+branch_verbose = mod_utils.has_arg(args, 'bv', 'branch-verbose')
 
 # Specify depth for recursive search
-depth = int(get_arg(args, 'd', 'depth') or "1")
+depth = int(mod_utils.get_arg(args, 'd', 'depth') or "1")
 
 # Compute projects to be executed:
 ignore_projects = []
