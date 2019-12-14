@@ -43,8 +43,15 @@ args = parser.parse_args()
 
 now = mod_time.time()
 
-branches = mod_gitutils.get_branches(args.remote, args.all, merged=args.merged, no_merged=args.no_merged)
+remote: bool = args.remote
+all_branches: bool = args.all
+merged: bool = args.merged
+no_merged: bool = args.no_merged
+
+branches = mod_gitutils.get_branches(remote, all_branches, merged=merged, no_merged=no_merged)
 for branch in branches:
+    if remote and not branch.startswith("remotes/"):
+        branch = f"remotes/{branch}"
     command = 'log ' + branch + ' -1 --format=%at --'
     success, result = mod_gitutils.execute_git(command, output=False)
     if not success:
