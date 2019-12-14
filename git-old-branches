@@ -26,6 +26,10 @@ mod_gitutils.assert_in_git_repository()
 parser = mod_argparse.ArgumentParser(
     description='Detects (and possibly deletes) old unused branches')
 
+parser.add_argument('--no-merged', action='store_true',
+                    default=False, help='Only *not* merged branches')
+parser.add_argument('--merged', action='store_true',
+                    default=False, help='Only merged branches')
 parser.add_argument('-r', '--remote', action='store_true',
                     default=False, help='Get remote branches')
 parser.add_argument('-a', '--all', action='store_true',
@@ -39,7 +43,7 @@ args = parser.parse_args()
 
 now = mod_time.time()
 
-branches = mod_gitutils.get_branches(args.remote, args.all)
+branches = mod_gitutils.get_branches(args.remote, args.all, merged=args.merged, no_merged=args.no_merged)
 for branch in branches:
     command = 'log ' + branch + ' -1 --format=%at --'
     success, result = mod_gitutils.execute_git(command, output=False)

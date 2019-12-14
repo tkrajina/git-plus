@@ -155,6 +155,11 @@ Find local and remote branches older than 120 days:
 
     $ git old-branches -a -d 120
 
+Find only merged or unmerged old branches:
+
+    $ git old-branches -a -d 120 --merged
+    $ git old-branches -a -d 120 --no-merged
+
 Find and remove branches older than 10 days:
 
     $ git old-branches -d 10 --delete
