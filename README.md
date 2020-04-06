@@ -6,6 +6,7 @@ Git plus is a set of git utilities:
  * **git relation** show a relation between two branches/commits/tags
  * **git old-branches** find old/unused branches
  * **git recent** list branches ordered by last commit time
+ * **git semver** lists and creates git semver (semantic versionsing) tags
 
 ## Installation
 
@@ -189,6 +190,24 @@ Show only **last** 10 branches:
 Show only **first** 15 branches:
 
     git recent 15
+
+# Git semver
+
+List all git semver tags:
+
+    git semver
+
+Increase major version:
+
+    git semver --major
+
+Increase minor version:
+
+    git semver --minor
+
+Increase patch version:
+
+    git semver --patch
 
 # License
 

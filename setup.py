@@ -34,5 +34,6 @@ mod_distutilscore.setup(
             'git-old-branches',
             'git-recent',
             'git-relation',
+            'git-semver',
         ]
 )

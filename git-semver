@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+# Copyright 2013 Tomo Krajina
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import sys as mod_sys
+import argparse as mod_argparse
+
+import gitutils as mod_gitutils
+
+from typing import *
+
+MAX_SUBVERSION = 1000000
+
+mod_gitutils.assert_in_git_repository()
+
+parser = mod_argparse.ArgumentParser(description='List / update semver tags')
+
+parser.add_argument('--major', action='store_true', default=False, help='Increase major version')
+parser.add_argument('--minor', action='store_true', default=False, help='Increase minor version')
+parser.add_argument('--patch', action='store_true', default=False, help='Increase patch version')
+
+args = parser.parse_args()
+incr_major: bool = args.major
+incr_minor: bool = args.minor
+incr_patch: bool = args.patch
+
+class Version:
+    def __init__(self, prefix: str, major: int, minor: int, patch: int):
+        self.prefix = prefix
+        self.major = major
+        self.minor = minor
+        self.patch = patch
+        if major >= MAX_SUBVERSION:
+            raise Exception(f"Invalid major: {major}")
+        if minor >= MAX_SUBVERSION:
+            raise Exception(f"Invalid minor: {minor}")
+        if patch >= MAX_SUBVERSION:
+            raise Exception(f"Invalid patch: {patch}")
+
+    def __str__(self) -> str:
+        return f"{self.major}.{self.minor}.{self.patch}"
+
+    def __lt__(self, other: "Version") -> bool:
+        return self.to_n() < other.to_n()
+
+    def to_n(self) -> int:
+        return self.major * MAX_SUBVERSION**2 + self.minor * MAX_SUBVERSION + self.patch
+
+def parse_tag_as_semver(tag: str) -> Optional[Version]:
+    if not tag:
+        return None
+    prefix = ""
+    if tag[0] == "v" or tag[0] == "V":
+        prefix = tag[0]
+        tag = tag[1:]
+    parts = tag.split(".")
+    if len(parts) != 3:
+        return None
+    try:
+        return Version(prefix, int(parts[0]), int(parts[1]), int(parts[2]))
+    except:
+        return None
+
+def get_all_versions(output_non_versions: bool=False) -> List[Version]:
+    success, tags = mod_gitutils.execute_git("tag", output=False)
+    if not success:
+        print('Error getting tags')
+        mod_sys.exit(1)
+    versions = []
+    for line in tags.split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        version = parse_tag_as_semver(line)
+        if not version:
+            if output_non_versions:
+                print(f"{line} not a tag")
+        else:
+            versions.append(version)
+    versions.sort()
+    return versions
+
+def get_max_version(versions: List[Version]) -> Version:
+    max_version = Version("v", 0, 0, 0)
+    for version in versions:
+        if version > max_version:
+            max_version = version
+    return max_version
+
+versions = get_all_versions(output_non_versions=True)
+max_version = get_max_version(versions)
+
+if not versions:
+    print("No tags")
+    mod_sys.exit(0)
+for n, version in enumerate(versions):
+    if n > 0:
+        previous_ver = versions[n-1]
+        if previous_ver.major != version.major:
+            print(f"New major: {version.major}")
+        if previous_ver.minor != version.minor:
+            print(f"New minor: {version.major}.{version.minor}")
+    print(f" * {version}")
+print()
+print(f"Last version: {max_version}")
+print()
+
+if incr_major or incr_minor or incr_patch:
+    if incr_patch:
+        max_version.patch += 1
+    if incr_minor:
+        max_version.minor += 1
+        max_version.patch = 0
+    if incr_major:
+        max_version.major += 1
+        max_version.minor = 0
+        max_version.patch = 0
+    print(f"Creating new version/tag: {max_version}")
+    new_tag = f'{max_version.prefix}{max_version.major}.{max_version.minor}.{max_version.patch}'
+    success, output = mod_gitutils.execute_git(f"tag {new_tag}")
+    if not success:
+        print(f'Error creating tag: {output}')
+        mod_sys.exit(1)
+    print(f'Tag {new_tag} created, you can push it now')
