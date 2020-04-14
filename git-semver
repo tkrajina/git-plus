@@ -36,7 +36,8 @@ incr_minor: bool = args.minor
 incr_patch: bool = args.patch
 
 class Version:
-    def __init__(self, prefix: str, major: int, minor: int, patch: int):
+    def __init__(self, tag: str, prefix: str, major: int, minor: int, patch: int):
+        self.tag = tag
         self.prefix = prefix
         self.major = major
         self.minor = minor
@@ -63,12 +64,13 @@ def parse_tag_as_semver(tag: str) -> Optional[Version]:
     prefix = ""
     if tag[0] == "v" or tag[0] == "V":
         prefix = tag[0]
-        tag = tag[1:]
-    parts = tag.split(".")
+        parts = tag[1:].split(".")
+    else:
+        parts = tag.split(".")
     if len(parts) != 3:
         return None
     try:
-        return Version(prefix, int(parts[0]), int(parts[1]), int(parts[2]))
+        return Version(tag, prefix, int(parts[0]), int(parts[1]), int(parts[2]))
     except:
         return None
 
@@ -92,7 +94,7 @@ def get_all_versions(output_non_versions: bool=False) -> List[Version]:
     return versions
 
 def get_max_version(versions: List[Version]) -> Version:
-    max_version = Version("v", 0, 0, 0)
+    max_version = Version("v0.0.0", "v", 0, 0, 0)
     for version in versions:
         if version > max_version:
             max_version = version
@@ -111,9 +113,9 @@ for n, version in enumerate(versions):
             print(f"New major: {version.major}")
         if previous_ver.minor != version.minor:
             print(f"New minor: {version.major}.{version.minor}")
-    print(f" * {version}")
+    print(f" * {version.tag}")
 print()
-print(f"Last version: {max_version}")
+print(f"Last version: {max_version.tag}")
 print()
 
 if incr_major or incr_minor or incr_patch:
