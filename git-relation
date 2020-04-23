@@ -23,12 +23,14 @@ mod_gitutils.assert_in_git_repository()
 parser = mod_argparse.ArgumentParser(
     description='Show a relation between two git commits/tags/branches')
 
-parser.add_argument('branch_1', metavar='branch_1', type=str,
+parser.add_argument('branch_1', metavar='branch_1', type=str, default='HEAD', nargs='?',
                    help='the one commit/tag/branch')
 parser.add_argument('branch_2', metavar='branch_2', type=str, nargs='?', default='HEAD',
                    help='the other commit/tag/branch (default HEAD)')
 parser.add_argument('-b', '--brief', action='store_true',
                     default=False, help='brief output')
+parser.add_argument('-u', '--upstream', action='store_true',
+                    default=False, help='relation with upstream branch')
 parser.add_argument('-a', '--all', action='store_true',
                     default=False, help='show all commits')
 
@@ -36,6 +38,19 @@ args = parser.parse_args()
 
 branch_1: str = args.branch_1
 branch_2: str = args.branch_2
+
+if args.upstream:
+    success, optput = mod_gitutils.execute_git('status -sb', output=False)
+    if not success:
+        print('error getting upstream branch')
+        mod_sys.exit(1)
+    first_line = optput.split("\n")[0]
+    branches = first_line.replace("##", "").strip().split("...")
+    if len(branches) != 2:
+        print(f'error getting upstream branch from {optput}')
+        mod_sys.exit(1)
+    branch_1 = branches[0]
+    branch_2 = branches[1].split("[")[0].strip()
 
 def get_git_sha1(branch_name: str) -> str:
     success, sha1 = mod_gitutils.execute_git('log -1 %s --format=%%H --' % branch_name,

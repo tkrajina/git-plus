@@ -140,6 +140,10 @@ By default, `git-rel` shows no more than 30 commits (if there are more some will
 
     $ git relation -a branch-1 branch-2
 
+Relation between current branch and its upstream (for example `master` and `origin/master`):
+
+    $ git relation -u
+
 ## Git old-branches
 
 Old-branches can detect old/unused branches.
