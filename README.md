@@ -175,7 +175,7 @@ Note that branches will not be removed unconditionally, you'll be asked once to 
 
 # Git recent
 
-Find list of branches ordered by last commit time:
+List branches ordered by last commit time:
 
     git recent
 
@@ -197,19 +197,19 @@ Show only **first** 15 branches:
 
 # Git semver
 
-List all git semver tags:
+List all git semver tags (i.e. tags in the format `vX.Y.Z`):
 
     git semver
 
-Increase major version:
+Increase major version (`v1.2.3` -> v`2.0.0`):
 
     git semver --major
 
-Increase minor version:
+Increase minor version (`v1.2.3` -> v`1.3.0`):
 
     git semver --minor
 
-Increase patch version:
+Increase patch (`v1.2.3` -> v`1.2.4`):
 
     git semver --patch
 
