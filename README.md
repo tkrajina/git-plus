@@ -50,7 +50,7 @@ Create a "test" branch on all repositories and checkout it immediately:
 
 ...and so on. The basic usage is simple "git multi normal_git_commands_here". In addition to this, "git multi -c git_commands" will execute "git_commands" only on changed repositories and "git multi -b" will show the current branch for all repositories.
 
-If you want your "git multi" commands to always execute all except some repositories add them to the file ".multigit_ignore" in the same directory.
+If you want your "git multi" commands to always execute all except some repositories add them to the file ".multigit_ignore" in the same directory. You could also pass a list of repos to exclude as a command line flag: `git multi -e repository1,repository2 status`.
 
 With:
 
@@ -59,7 +59,7 @@ With:
 A .tar archive named git-repositories-yyyy-mm-dd-hh-mm.tar with all repositories in this directory (i.e. their .git directories) will be created.
 
 If you have a nested structure of repositories, e.g. ~/project1/repository1, ~/project1/repository2, ~/project2/repository3, use
-    
+
     git multi -d 2
 
 ... or a different number to look for git repositories up to the specified depth.
@@ -69,7 +69,7 @@ If you have a nested structure of repositories, e.g. ~/project1/repository1, ~/p
 If you have many projects with same git command output, for example:
 
     git multi status
-    
+
     aaa:
     	# On branch master
     	nothing to commit (working directory clean)
