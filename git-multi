@@ -125,7 +125,7 @@ single_project = mod_utils.get_arg(args, 'p', 'project')
 if single_project and single_project[-1] == '/':
     single_project = single_project[: -1]
 
-# Check projects which we don't need to be part of gut multi commands execution:
+# Check projects which we don't need to be part of git multi commands execution:
 exc = []
 except_projects = mod_utils.get_arg(args, 'e', 'except')
 if except_projects:
