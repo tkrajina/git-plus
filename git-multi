@@ -36,7 +36,7 @@ only_if_changed = False
 
 
 def is_ignored(project: str) -> bool:
-    return project in ignore_projects
+    return (project in ignore_projects) or (project in except_projects)
 
 
 def process_dir(dirname: str, depth: int) -> None:
@@ -126,7 +126,11 @@ if single_project and single_project[-1] == '/':
     single_project = single_project[: -1]
 
 # Check projects which we don't need to be part of gut multi commands execution:
+exc = []
 except_projects = mod_utils.get_arg(args, 'e', 'except')
+if except_projects:
+    exc = [x.strip() for x in except_projects.split(",")]
+except_projects = exc
 
 # Check if to execute only on projects which contain some changes:
 only_if_changed = mod_utils.has_arg(args, 'c', 'changed')
