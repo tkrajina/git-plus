@@ -74,7 +74,7 @@ def parse_tag_as_semver(tag: str) -> Optional[Version]:
     except:
         return None
 
-def get_all_versions(output_non_versions: bool=False) -> List[Version]:
+def get_all_versions_ordered(output_non_versions: bool=False) -> List[Version]:
     success, tags = mod_gitutils.execute_git("tag", output=False)
     if not success:
         print('Error getting tags')
@@ -93,15 +93,8 @@ def get_all_versions(output_non_versions: bool=False) -> List[Version]:
     versions.sort()
     return versions
 
-def get_max_version(versions: List[Version]) -> Version:
-    max_version = Version("v0.0.0", "v", 0, 0, 0)
-    for version in versions:
-        if version > max_version:
-            max_version = version
-    return max_version
-
-versions = get_all_versions(output_non_versions=True)
-max_version = get_max_version(versions)
+versions = get_all_versions_ordered(output_non_versions=True)
+max_version = versions[-1] if versions else Version("v0.0.0", "v", 0, 0, 0)
 
 if not versions:
     print("No tags")
