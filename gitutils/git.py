@@ -107,3 +107,17 @@ def is_changed() -> bool:
     executed, changed_lines = execute_git('status --porcelain', output=False)
     merge_not_finished = mod_path.exists('.git/MERGE_HEAD')
     return cast(bool, changed_lines.strip() or merge_not_finished)
+
+
+def get_git_sha1(branch_name: str) -> str:
+    success, sha1 = execute_git('log -1 %s --format=%%H --' % branch_name,
+                                             output=False)
+    if not success:
+        raise Exception(f'Invalid branch {branch_name}')
+    return sha1.strip()
+
+def distance_to_commit(commit_1: str, commit_2: str) -> int:
+    success, log = execute_git(f'rev-list {commit_1}..{commit_2} --count', output=False)
+    if not success:
+        raise Exception(f'Error calculating distance between {commit_1}..{commit_2}')
+    return int(log)

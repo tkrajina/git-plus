@@ -72,14 +72,6 @@ if args.upstream:
     branch_1 = branches[0]
     branch_2 = branches[1].split("[")[0].strip()
 
-def get_git_sha1(branch_name: str) -> str:
-    success, sha1 = git.execute_git('log -1 %s --format=%%H --' % branch_name,
-                                             output=False)
-    if not success:
-        print('Invalid branch %s' % branch_name)
-        sys.exit(1)
-    return sha1.strip()
-
 
 def print_log(commit_1: str, commit_2: str, all_commits: bool=False) -> None:
     success, log = git.execute_git(
@@ -106,17 +98,8 @@ def print_log(commit_1: str, commit_2: str, all_commits: bool=False) -> None:
 
     print('\n'.join(lines))
 
-def distance_to_commit(commit_1: str, commit_2: str) -> int:
-    success, log = git.execute_git(
-        'rev-list %s..%s --count' % (commit_1, commit_2),
-        output=False)
-    if not success:
-        print('Error calculating distance between %s..%s' % (commit_1, commit_2))
-        sys.exit(1)
-    return int(log)
-
-branch_1_sha1 = get_git_sha1(branch_1)
-branch_2_sha1 = get_git_sha1(branch_2)
+branch_1_sha1 = git.get_git_sha1(branch_1)
+branch_2_sha1 = git.get_git_sha1(branch_2)
 
 success, merge_base = git.execute_git('merge-base %s %s' % (branch_1, branch_2),
                                                output=False)
@@ -128,15 +111,15 @@ if not success:
 elif merge_base == branch_1_sha1 and merge_base == branch_2_sha1:
     print('\033[1;34m%s\033[0m \033[1;31mEQUALS\033[0m \033[1;34m%s\033[0m' % (branch_1, branch_2))
 elif merge_base == branch_1_sha1:
-    print('\033[1;34m%s\033[0m is \033[1;31mBEHIND\033[0m \033[1;34m%s\033[0m by %d commits' % (branch_1, branch_2, distance_to_commit(branch_1, branch_2)))
+    print('\033[1;34m%s\033[0m is \033[1;31mBEHIND\033[0m \033[1;34m%s\033[0m by %d commits' % (branch_1, branch_2, git.distance_to_commit(branch_1, branch_2)))
     if not args.brief:
         print_log(branch_1, branch_2, args.all)
 elif merge_base == branch_2_sha1:
-    print('\033[1;34m%s\033[0m is \033[1;31mAHEAD\033[0m of \033[1;34m%s\033[0m by %d commits' % (branch_1, branch_2, distance_to_commit(branch_2, branch_1)))
+    print('\033[1;34m%s\033[0m is \033[1;31mAHEAD\033[0m of \033[1;34m%s\033[0m by %d commits' % (branch_1, branch_2, git.distance_to_commit(branch_2, branch_1)))
     if not args.brief:
         print_log(branch_2, branch_1, args.all)
 else:
-    print('\033[1;34m%s\033[0m and \033[1;34m%s\033[0m \033[1;31mDIVERGED\033[0m by respectively %d and %d commits' % (branch_1, branch_2, distance_to_commit(merge_base, branch_1), distance_to_commit(merge_base, branch_2)))
+    print('\033[1;34m%s\033[0m and \033[1;34m%s\033[0m \033[1;31mDIVERGED\033[0m by respectively %d and %d commits' % (branch_1, branch_2, git.distance_to_commit(merge_base, branch_1), git.distance_to_commit(merge_base, branch_2)))
     if not args.brief:
         print('common point is \033[1;34m%s\033[0m'%(merge_base))
         print_log(merge_base, branch_1, args.all)
