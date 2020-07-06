@@ -18,7 +18,7 @@ import distutils.core as mod_distutilscore
 
 mod_distutilscore.setup(
     name='git-plus',
-    version='v0.4.4',
+    version='v0.4.5',
     description='Set of git utilities',
     license='Apache License, Version 2.0',
     author='Tomo Krajina',
