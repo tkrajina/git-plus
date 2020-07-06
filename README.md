@@ -144,6 +144,14 @@ Relation between current branch and its upstream (for example `master` and `orig
 
     $ git relation -u
 
+Relation between `HEAD` and the highest semver tag:
+
+    $ git relation -sv
+
+Relation between `HEAD` and the second last semver tag:
+
+    $ git relation -svn 2
+
 ## Git old-branches
 
 Old-branches can detect old/unused branches.
