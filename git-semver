@@ -16,12 +16,12 @@
 import sys
 import argparse
 
-import gitutils
+import gitutils.git as git
 import gitutils.semver as semver
 
 from typing import *
 
-gitutils.assert_in_git_repository()
+git.assert_in_git_repository()
 
 parser = argparse.ArgumentParser(description='List / update semver tags')
 
@@ -68,7 +68,7 @@ if incr_major or incr_minor or incr_patch:
     if suffix:
         new_tag += "-" + suffix
     print(f"Creating new version/tag: {new_tag}")
-    success, output = gitutils.execute_git(f"tag {new_tag}")
+    success, output = git.execute_git(f"tag {new_tag}")
     if not success:
         print(f'Error creating tag: {output}')
         sys.exit(1)

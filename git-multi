@@ -13,20 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys as mod_sys
-import os as mod_os
-import os.path as mod_path
-import datetime as mod_datetime
+import sys
+import os
+import os.path as path
+import datetime
 
-import gitutils as mod_gitutils
-import gitutils.utils as mod_utils
+import gitutils.git as git
+import gitutils.utils as utils
 
 from typing import *
 
 # Prefix for git command output:
 PREFIX = '\t'
 
-args = mod_sys.argv[1:]
+args = sys.argv[1:]
 # If true, projects with same git command output will be groupped together:
 group_by_output = True
 
@@ -40,20 +40,20 @@ def is_ignored(project: str) -> bool:
 
 
 def process_dir(dirname: str, depth: int) -> None:
-    abs_dir_name = mod_os.path.abspath(dirname)
-    for file_name in mod_os.listdir(dirname):
+    abs_dir_name = os.path.abspath(dirname)
+    for file_name in os.listdir(dirname):
         if not single_project or single_project == file_name:
-            mod_os.chdir(abs_dir_name)
+            os.chdir(abs_dir_name)
 
-            if mod_path.isdir(file_name):
-                if mod_path.exists('%s/.git' % file_name):
+            if path.isdir(file_name):
+                if path.exists('%s/.git' % file_name):
                     process_project(abs_dir_name, file_name)
 
                     if show_progress and group_by_output:
                         print('*', end=' ')
-                        mod_sys.stdout.flush()
+                        sys.stdout.flush()
                 elif depth > 1:
-                    process_dir(mod_os.path.join(abs_dir_name, file_name), depth - 1)
+                    process_dir(os.path.join(abs_dir_name, file_name), depth - 1)
 
 
 def process_project(current_path: str, file_name: str) -> None:
@@ -61,7 +61,7 @@ def process_project(current_path: str, file_name: str) -> None:
         return
 
     dir_path = '%s/%s' % (current_path, file_name)
-    mod_os.chdir(dir_path)
+    os.chdir(dir_path)
 
     output = ''
 
@@ -75,14 +75,14 @@ def process_project(current_path: str, file_name: str) -> None:
 
     execute = True
     if only_if_changed:
-        execute = mod_gitutils.is_changed()
+        execute = git.is_changed()
         if not execute:
             output = PREFIX + 'Not changed'
             if do_output:
                 print(output)
 
     if execute:
-        executed, result = mod_gitutils.execute_command(git_command, output=do_output, prefix=PREFIX, grep=grep)
+        executed, result = git.execute_command(git_command, output=do_output, prefix=PREFIX, grep=grep)
         result = result.rstrip()
 
         if not executed:
@@ -108,7 +108,7 @@ group_by_output = False
 # 	git config --global 'multi.groupbyoutput' 1
 # Unset by:
 # 	git config --global --unset 'multi.groupbyoutput'
-config_properties = mod_gitutils.get_config_properties()
+config_properties = git.get_config_properties()
 group_by_output_config_key = 'multi.groupbyoutput'
 if group_by_output_config_key in config_properties:
     group_by_output_config_value = config_properties[group_by_output_config_key]
@@ -118,31 +118,31 @@ if group_by_output_config_key in config_properties:
             group_by_output = True
 
 # Check if to do backup of projects:
-backup = mod_utils.has_arg(args, 'a', 'archive')
+backup = utils.has_arg(args, 'a', 'archive')
 
 # Check if needed to be executed on only one project:
-single_project = mod_utils.get_arg(args, 'p', 'project')
+single_project = utils.get_arg(args, 'p', 'project')
 if single_project and single_project[-1] == '/':
     single_project = single_project[: -1]
 
 # Check projects which we don't need to be part of git multi commands execution:
 ignore_projects: List[str] = []
-except_projects = mod_utils.get_arg(args, 'e', 'except')
+except_projects = utils.get_arg(args, 'e', 'except')
 if except_projects:
     ignore_projects = [x.strip() for x in except_projects.split(",")]
 
 # Check if to execute only on projects which contain some changes:
-only_if_changed = mod_utils.has_arg(args, 'c', 'changed')
+only_if_changed = utils.has_arg(args, 'c', 'changed')
 
 # Output only the current branch for all projects:
-branch = mod_utils.has_arg(args, 'b', 'branch')
-branch_verbose = mod_utils.has_arg(args, 'bv', 'branch-verbose')
+branch = utils.has_arg(args, 'b', 'branch')
+branch_verbose = utils.has_arg(args, 'bv', 'branch-verbose')
 
 # Specify depth for recursive search
-depth = int(mod_utils.get_arg(args, 'd', 'depth') or "1")
+depth = int(utils.get_arg(args, 'd', 'depth') or "1")
 
 # Compute projects to be executed:
-if mod_path.exists('.multigit_ignore'):
+if path.exists('.multigit_ignore'):
     f = open('.multigit_ignore')
     for line in f:
         project = line.strip()
@@ -152,14 +152,14 @@ if mod_path.exists('.multigit_ignore'):
 
 # Execute backup?
 if backup:
-    now = mod_datetime.datetime.now().strftime('%Y-%m-%d-%H-%M')
+    now = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M')
     tar_name = 'git-repositories-%s.tar' % (now)
 
-    executed, output = mod_gitutils.execute_command('tar cvf %s */.git */.gitignore' % tar_name, output=True)
+    executed, output = git.execute_command('tar cvf %s */.git */.gitignore' % tar_name, output=True)
 
     print('Saved git repositories to %s' % tar_name)
 
-    mod_sys.exit(0)
+    sys.exit(0)
 
 grep = None
 
@@ -193,10 +193,10 @@ outputs: Dict[str, List[str]] = {}
 
 if show_progress and group_by_output:
     print('Progress:', end=' ')
-    mod_sys.stdout.flush()
+    sys.stdout.flush()
 
 # Execute command on all subdirectories:
-process_dir(mod_os.getcwd(), depth)
+process_dir(os.getcwd(), depth)
 
 if show_progress and group_by_output:
     print()

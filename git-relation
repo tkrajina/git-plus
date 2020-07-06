@@ -16,10 +16,10 @@
 import sys
 import argparse
 
-import gitutils
+import gitutils.git as git
 from gitutils import semver
 
-gitutils.assert_in_git_repository()
+git.assert_in_git_repository()
 
 parser = argparse.ArgumentParser(
     description='Show a relation between two git commits/tags/branches')
@@ -60,7 +60,7 @@ if branch_2_n_old_semver:
         sys.exit(1)
 
 if args.upstream:
-    success, optput = gitutils.execute_git('status -sb', output=False)
+    success, optput = git.execute_git('status -sb', output=False)
     if not success:
         print('error getting upstream branch')
         sys.exit(1)
@@ -73,7 +73,7 @@ if args.upstream:
     branch_2 = branches[1].split("[")[0].strip()
 
 def get_git_sha1(branch_name: str) -> str:
-    success, sha1 = gitutils.execute_git('log -1 %s --format=%%H --' % branch_name,
+    success, sha1 = git.execute_git('log -1 %s --format=%%H --' % branch_name,
                                              output=False)
     if not success:
         print('Invalid branch %s' % branch_name)
@@ -82,7 +82,7 @@ def get_git_sha1(branch_name: str) -> str:
 
 
 def print_log(commit_1: str, commit_2: str, all_commits: bool=False) -> None:
-    success, log = gitutils.execute_git(
+    success, log = git.execute_git(
         'log %s..%s --format=%%x20%%x20%%x20%%h%%x20%%Cgreen%%an%%Creset%%x20\"%%Cred%%s%%Creset\",%%x20%%ar' % (commit_1, commit_2),
         output=False)
     if not success:
@@ -107,7 +107,7 @@ def print_log(commit_1: str, commit_2: str, all_commits: bool=False) -> None:
     print('\n'.join(lines))
 
 def distance_to_commit(commit_1: str, commit_2: str) -> int:
-    success, log = gitutils.execute_git(
+    success, log = git.execute_git(
         'rev-list %s..%s --count' % (commit_1, commit_2),
         output=False)
     if not success:
@@ -118,7 +118,7 @@ def distance_to_commit(commit_1: str, commit_2: str) -> int:
 branch_1_sha1 = get_git_sha1(branch_1)
 branch_2_sha1 = get_git_sha1(branch_2)
 
-success, merge_base = gitutils.execute_git('merge-base %s %s' % (branch_1, branch_2),
+success, merge_base = git.execute_git('merge-base %s %s' % (branch_1, branch_2),
                                                output=False)
 merge_base = merge_base.strip()
 if not success:
