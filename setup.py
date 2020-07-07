@@ -24,7 +24,7 @@ mod_distutilscore.setup(
     author='Tomo Krajina',
     author_email='tkrajina@gmail.com',
     url='https://github.com/tkrajina/git-plus',
-    packages=['gitutils', ],
+    packages=['gitplus', ],
     classifiers=[
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",

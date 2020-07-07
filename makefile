@@ -7,10 +7,11 @@ test: mypy
 	./git-old-branches  -d -1
 	./git-recent
 	./git-relation HEAD HEAD~5
+	./git-semver
 
 .PHONY: mypy
 mypy:
-	for script in $(shell ls git-*); do mypy --strict $$script; done
+	mypy --strict .
 
 .PHONY: check-all-commited
 check-all-commited:
