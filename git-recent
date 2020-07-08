@@ -13,4 +13,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import gitplus.cmd_git_old_branches
+import gitplus.cmd_git_recent
