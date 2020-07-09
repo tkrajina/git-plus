@@ -67,8 +67,8 @@ if args.upstream:
     first_line = optput.split("\n")[0]
     branches = first_line.replace("##", "").strip().split("...")
     if len(branches) != 2:
-        print(f'error getting upstream branch from {optput}')
-        sys.exit(1)
+        print(f'no upstream branch: {first_line}')
+        sys.exit(0)
     branch_1 = branches[0]
     branch_2 = branches[1].split("[")[0].strip()
 
