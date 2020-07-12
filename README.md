@@ -136,6 +136,11 @@ Another example:
       1d3b97c Tomo Krajina Preparations for marker handler, 3 weeks ago
       9546769 Tomo Krajina Removed all subscription stuff, 3 months ago
 
+Brief:
+
+    $ git -v relation branch-1 branch-2
+    branch-1 and branch-2 DIVERGED, common point is 7e0bb439dd2aef4ff0262afec0a98461489becae
+
 By default, `git-rel` shows no more than 30 commits (if there are more some will be omitted). You can show the list of all commits with:
 
     $ git relation -a branch-1 branch-2
