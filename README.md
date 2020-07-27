@@ -149,6 +149,10 @@ Relation between current branch and its upstream (for example `master` and `orig
 
     $ git relation -u
 
+Relation between another branch and its upstream:
+
+    $ git relation -u dev
+
 Relation between `HEAD` and the highest semver tag:
 
     $ git relation -sv
