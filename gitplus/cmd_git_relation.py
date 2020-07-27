@@ -60,6 +60,9 @@ if branch_2_n_old_semver:
         sys.exit(1)
 
 if args.upstream:
+    if branch_2:
+        print('cannot use --upstream and specify the second branch')
+        sys.exit(1)
     success, optput = git.execute_git(f'rev-parse --abbrev-ref {branch_1}@{{u}}', output=False)
     if not success:
         print('error getting upstream branch')
