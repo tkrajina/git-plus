@@ -60,17 +60,12 @@ if branch_2_n_old_semver:
         sys.exit(1)
 
 if args.upstream:
-    success, optput = git.execute_git('status -sb', output=False)
+    success, optput = git.execute_git(f'rev-parse --abbrev-ref {branch_1}@{{u}}', output=False)
     if not success:
         print('error getting upstream branch')
         sys.exit(1)
     first_line = optput.split("\n")[0]
-    branches = first_line.replace("##", "").strip().split("...")
-    if len(branches) != 2:
-        print(f'no upstream branch: {first_line}')
-        sys.exit(0)
-    branch_1 = branches[0]
-    branch_2 = branches[1].split("[")[0].strip()
+    branch_2 = first_line
 
 
 def print_log(commit_1: str, commit_2: str, all_commits: bool=False) -> None:
