@@ -19,6 +19,8 @@ import time as mod_time
 
 from . import git
 
+from typing import *
+
 git.assert_in_git_repository()
 
 parser = mod_argparse.ArgumentParser(
@@ -26,11 +28,13 @@ parser = mod_argparse.ArgumentParser(
 
 parser.add_argument('-r', '--remote', action='store_true',
                     default=False, help='Get remote branches')
+parser.add_argument('-b', '--brief', action='store_true',
+                    default=False, help='brief output')
 parser.add_argument('-a', '--all', action='store_true',
                     default=False, help='Get all (local and remote) branches')
-parser.add_argument('--no-merged', action='store_true',
+parser.add_argument('-n', '--no-merged', action='store_true',
                     default=False, help='Only *not* merged branches')
-parser.add_argument('--merged', action='store_true',
+parser.add_argument('-m', '--merged', action='store_true',
                     default=False, help='Only merged branches')
 parser.add_argument('entries', metavar='entries', type=int, default=1000, nargs='?',
                     help='Number of entries (negative number if you want the last N entries)')
@@ -41,7 +45,13 @@ now = mod_time.time()
 
 times_and_branches = []
 
-branches = git.get_branches(args.remote, merged=args.merged, no_merged=args.no_merged, all=args.all)
+brief: bool = args.brief
+merged: bool = args.merged
+remote: bool = args.remote
+get_all: bool = args.all
+no_merged: bool = args.no_merged
+
+branches = git.get_branches(remote, merged=merged, no_merged=no_merged, all=get_all)
 for branch in branches:
     cmd = 'log ' + branch + ' -1 --format=%at --'
     success, result = git.execute_git(cmd, output=False)
@@ -49,12 +59,13 @@ for branch in branches:
         mod_sys.stderr.write(cmd)
         mod_sys.stderr.write(result)
 
+    time_diff_seconds = int(now) - int(result)
     if (not success) or (len(result.strip()) == 0):
         print('Cannot find the age of %s' % branch)
+    elif brief:
+        times_and_branches.append((time_diff_seconds, branch))
     else:
-        time_diff_seconds = int(now) - int(result)
         time_diff_days = int((float(time_diff_seconds) / (60*60*24)) * 100) / 100.
-
         times_and_branches.append((time_diff_seconds, '%10s days: %s' % (time_diff_days, branch), ))
 
 times_and_branches.sort()
