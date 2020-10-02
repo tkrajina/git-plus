@@ -17,22 +17,60 @@ import sys
 import os
 import os.path as path
 import datetime
+import argparse
 
 from . import git
-from . import utils
 
 from typing import *
+
+
+parser = argparse.ArgumentParser(
+    description='Execute single git command on multiple repositories')
+
+# parser.add_argument('-r', '--remote', action='store_true',
+#                     default=False, help='Get remote branches')
+parser.add_argument('-a', '--archive', action='store_true', default=False, help='Create .tar archive of all repositories')
+parser.add_argument('-b', '--branch', action='store_true', default=False, help='Current branch')
+parser.add_argument('-bv', '--branch-verbose', action='store_true', default=False, help='Current branch (verbose)')
+parser.add_argument('-p', '--project', type=str, default="", help='Execute on single project')
+parser.add_argument('-d', '--depth', type=int, default=1, help='Recursive directories depth')
+parser.add_argument('-e', '--except', type=str, default="", help='Except project')
+parser.add_argument('-c', '--changed', action='store_true', default=False, help='Execute only on projects with uncomitted changes')
+parser.add_argument('gitcmds', nargs='*', help='Git command')
+
+args = parser.parse_args()
+
+# Check if to do backup of projects:
+backup: bool = args.archive
+
+# Check if needed to be executed on only one project:
+single_project: str = args.project
+if single_project and single_project[-1] == '/':
+    single_project = single_project[: -1]
+
+# Check projects which we don't need to be part of git multi commands execution:
+ignore_projects: List[str] = []
+except_projects: str = getattr(args, "except")
+if except_projects:
+    ignore_projects = [x.strip() for x in except_projects.split(",")]
+
+# Check if to execute only on projects which contain some changes:
+only_if_changed: bool = args.changed
+
+# Output only the current branch for all projects:
+branch: bool = args.branch
+branch_verbose: bool = args.branch_verbose
+
+# Specify depth for recursive search
+depth: int = args.depth or 1
+
+
 
 # Prefix for git command output:
 PREFIX = '\t'
 
-args = sys.argv[1:]
 # If true, projects with same git command output will be groupped together:
 group_by_output = True
-
-# -c switch in command line, if true execute only if project not changed (i.e.
-# the `git --porcelain` output is empty:
-only_if_changed = False
 
 
 def is_ignored(project: str) -> bool:
@@ -117,30 +155,6 @@ if group_by_output_config_key in config_properties:
         if group_by_output_config_value.lower() in ('true', '1'):
             group_by_output = True
 
-# Check if to do backup of projects:
-backup = utils.has_arg(args, 'a', 'archive')
-
-# Check if needed to be executed on only one project:
-single_project = utils.get_arg(args, 'p', 'project')
-if single_project and single_project[-1] == '/':
-    single_project = single_project[: -1]
-
-# Check projects which we don't need to be part of git multi commands execution:
-ignore_projects: List[str] = []
-except_projects = utils.get_arg(args, 'e', 'except')
-if except_projects:
-    ignore_projects = [x.strip() for x in except_projects.split(",")]
-
-# Check if to execute only on projects which contain some changes:
-only_if_changed = utils.has_arg(args, 'c', 'changed')
-
-# Output only the current branch for all projects:
-branch = utils.has_arg(args, 'b', 'branch')
-branch_verbose = utils.has_arg(args, 'bv', 'branch-verbose')
-
-# Specify depth for recursive search
-depth = int(utils.get_arg(args, 'd', 'depth') or "1")
-
 # Compute projects to be executed:
 if path.exists('.multigit_ignore'):
     f = open('.multigit_ignore')
@@ -165,8 +179,8 @@ grep = None
 
 # If no specific command is entered (i.e. only 'git multi'):
 git_command = ['status', '-s']
-if args:
-    git_command = args
+if args.gitcmds:
+    git_command = args.gitcmds
 
 if branch_verbose:
     git_command = ['branch', '-v']
