@@ -60,6 +60,8 @@ def get_branches(remote: bool=False, all: bool=False, merged: bool=False, no_mer
         elif '->' in branch:
             # Branch is an alias
             return branch.split('->')[0].strip()
+        elif 'HEAD detached at' in branch:
+            return 'HEAD'
         return branch.strip()
 
     lines = result.strip().split('\n')
