@@ -71,7 +71,7 @@ for branch in branches:
             print('Branch %s is older than %s days (%s)!' % (branch, args.days, time_diff_days))
             if args.delete:
                 answer = input('Remove [yes/N] ?')
-                if answer.lower() == 'yes':
+                if answer.lower() == 'y':
                     git.delete_branch(branch, force=True)
                 else:
                     print('Not deleted')

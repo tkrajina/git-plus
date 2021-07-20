@@ -186,7 +186,7 @@ Find and remove branches older than 10 days:
 
     $ git old-branches -d 10 --delete
     Branch old-branch is older than 10 days (13.89)!
-    Remove [yes/N] ?
+    Remove [y/N] ?
 
 Note that branches will not be removed unconditionally, you'll be asked once to confirm the deletion.
 
