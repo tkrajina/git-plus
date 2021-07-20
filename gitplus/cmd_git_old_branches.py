@@ -49,6 +49,7 @@ merged: bool = args.merged
 no_merged: bool = args.no_merged
 
 branches = git.get_branches(remote, all_branches, merged=merged, no_merged=no_merged)
+delete_all = False
 for branch in branches:
     if remote and not branch.startswith("remotes/"):
         branch = f"remotes/{branch}"
@@ -70,7 +71,15 @@ for branch in branches:
         if time_diff_days > args.days:
             print('Branch %s is older than %s days (%s)!' % (branch, args.days, time_diff_days))
             if args.delete:
-                answer = input('Remove [yes/N] ?')
+                if delete_all:
+                    answer = 'y'
+                else:
+                    answer = input('Remove [y/N/all] ?')
+
+                if answer.lower() == 'all' and input(f"Really delete all filtered branches [y/N]?") == 'y':
+                    delete_all = True
+                    answer = 'y'
+
                 if answer.lower() == 'y':
                     git.delete_branch(branch, force=True)
                 else:
