@@ -30,6 +30,8 @@ parser.add_argument('branch_2', metavar='branch_2', type=str, nargs='?', default
                    help='the other commit/tag/branch (default HEAD)')
 parser.add_argument('-b', '--brief', action='store_true',
                     default=False, help='brief output')
+parser.add_argument('-m', '--msg', action='store_true',
+                    default=False, help='only commit messages')
 parser.add_argument('-u', '--upstream', action='store_true',
                     default=False, help='relation with upstream branch')
 parser.add_argument('-a', '--all', action='store_true',
@@ -45,6 +47,7 @@ branch_1: str = args.branch_1
 branch_2: str = args.branch_2
 branch_2_latest_semver: bool = args.semver
 branch_2_n_old_semver: int = args.semvern
+only_messages: str = args.msg
 
 if branch_2_latest_semver:
     branch_2_n_old_semver = 1
@@ -72,9 +75,12 @@ if args.upstream:
 
 
 def print_log(commit_1: str, commit_2: str, all_commits: bool=False) -> None:
-    success, log = git.execute_git(
-        'log %s..%s --format=%%x20%%x20%%x20%%h%%x20%%Cgreen%%an%%Creset%%x20\"%%Cred%%s%%Creset\",%%x20%%ar' % (commit_1, commit_2),
-        output=False)
+    cmd = 'log %s..%s' % (commit_1, commit_2)
+    if only_messages:
+        cmd += ' --oneline'
+    else:
+        cmd += ' --format=%x20%x20%x20%h%x20%Cgreen%an%Creset%x20\"%Cred%s%Creset\",%x20%ar'
+    success, log = git.execute_git(cmd, output=False)
     if not success:
         print('Error retrieving log %s..%s' % (commit_1, commit_2))
         sys.exit(1)
