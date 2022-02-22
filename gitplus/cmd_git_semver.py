@@ -42,17 +42,6 @@ max_version = versions[-1] if versions else semver.Version("v0.0.0", "v", 0, 0, 
 if not versions:
     print("No tags")
     sys.exit(0)
-for n, version in enumerate(versions):
-    if n > 0:
-        previous_ver = versions[n-1]
-        if previous_ver.major != version.major:
-            print(f"New major: {version.major}")
-        if previous_ver.minor != version.minor:
-            print(f"New minor: {version.major}.{version.minor}")
-    print(f" * {version.tag}")
-print()
-print(f"Last version: {max_version.tag}")
-print()
 
 if incr_major or incr_minor or incr_patch:
     if incr_patch:
@@ -73,3 +62,15 @@ if incr_major or incr_minor or incr_patch:
         print(f'Error creating tag: {output}')
         sys.exit(1)
     print(f'Tag {new_tag} created, you can push it now')
+else:
+    for n, version in enumerate(versions):
+        if n > 0:
+            previous_ver = versions[n-1]
+            if previous_ver.major != version.major:
+                print(f"New major: {version.major}")
+            if previous_ver.minor != version.minor:
+                print(f"New minor: {version.major}.{version.minor}")
+        print(f" * {version.tag}")
+    print()
+    print(f"Last version: {max_version.tag}")
+    print()
