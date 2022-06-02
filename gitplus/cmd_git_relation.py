@@ -28,8 +28,7 @@ parser.add_argument('branch_1', metavar='branch_1', type=str, default='HEAD', na
                    help='the one commit/tag/branch')
 parser.add_argument('branch_2', metavar='branch_2', type=str, nargs='?', default='HEAD',
                    help='the other commit/tag/branch (default HEAD)')
-parser.add_argument('-b', '--brief', action='store_true',
-                    default=False, help='brief output')
+parser.add_argument('-b', '--brief', action='store_true', default=False, help='brief output')
 parser.add_argument('-m', '--msg', action='store_true',
                     default=False, help='only commit messages')
 parser.add_argument('-u', '--upstream', action='store_true',
@@ -40,6 +39,9 @@ parser.add_argument('-sv', '--semver', action='store_true',
                     default=False, help='relation with latest semver tag')
 parser.add_argument('-svn', '--semvern', type=int,
                     default=0, help='relation with semver tag before n semantic versions')
+parser.add_argument('-md', '--markdown', action='store_true', default=False, help='Markdown (and remove merge commits)')
+parser.add_argument('-g', '--grep', type=str, default="", help='Filter only commits containing this string')
+parser.add_argument('-ig', '--inverted-grep', type=str, default="", help='Filter only commits NOT containing this string')
 
 args = parser.parse_args()
 
@@ -48,6 +50,10 @@ branch_2: str = args.branch_2
 branch_2_latest_semver: bool = args.semver
 branch_2_n_old_semver: int = args.semvern
 only_messages: str = args.msg
+markdown = args.markdown
+grep_string = args.grep
+inverted_grep_string = args.inverted_grep
+brief = args.brief
 
 if branch_2_latest_semver:
     branch_2_n_old_semver = 1
@@ -78,8 +84,17 @@ def print_log(commit_1: str, commit_2: str, all_commits: bool=False) -> None:
     cmd = ['log', f'{commit_1}..{commit_2}']
     if only_messages:
         cmd.append('--oneline')
+    elif markdown:
+        cmd.append('--format=* %s')
     else:
         cmd.append('--format=%x20%x20%x20%h%x20%Cgreen%an%Creset%x20\"%Cred%s%Creset\",%x20%ar')
+
+    if grep_string:
+        cmd.append(f'--grep={grep_string}')
+    elif inverted_grep_string:
+        cmd.append(f'--grep={inverted_grep_string}')
+        cmd.append('--invert-grep')
+
     success, log = git.execute_git(cmd, output=False)
     if not success:
         print('Error retrieving log %s..%s' % (commit_1, commit_2))
@@ -116,7 +131,7 @@ elif merge_base == branch_1_sha1 and merge_base == branch_2_sha1:
     print('\033[1;34m%s\033[0m \033[1;31mEQUALS\033[0m \033[1;34m%s\033[0m' % (branch_1, branch_2))
 elif merge_base == branch_1_sha1:
     print('\033[1;34m%s\033[0m is \033[1;31mBEHIND\033[0m \033[1;34m%s\033[0m by %d commits' % (branch_1, branch_2, git.distance_to_commit(branch_1, branch_2)))
-    if not args.brief:
+    if not brief:
         print_log(branch_1, branch_2, args.all)
 elif merge_base == branch_2_sha1:
     print('\033[1;34m%s\033[0m is \033[1;31mAHEAD\033[0m of \033[1;34m%s\033[0m by %d commits' % (branch_1, branch_2, git.distance_to_commit(branch_2, branch_1)))
