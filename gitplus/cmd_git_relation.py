@@ -75,11 +75,11 @@ if args.upstream:
 
 
 def print_log(commit_1: str, commit_2: str, all_commits: bool=False) -> None:
-    cmd = 'log %s..%s' % (commit_1, commit_2)
+    cmd = ['log', f'{commit_1}..{commit_2}']
     if only_messages:
-        cmd += ' --oneline'
+        cmd.append('--oneline')
     else:
-        cmd += ' --format=%x20%x20%x20%h%x20%Cgreen%an%Creset%x20\"%Cred%s%Creset\",%x20%ar'
+        cmd.append('--format=%x20%x20%x20%h%x20%Cgreen%an%Creset%x20\"%Cred%s%Creset\",%x20%ar')
     success, log = git.execute_git(cmd, output=False)
     if not success:
         print('Error retrieving log %s..%s' % (commit_1, commit_2))

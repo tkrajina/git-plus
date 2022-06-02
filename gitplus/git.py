@@ -32,8 +32,12 @@ def execute_command(cmd: Union[str, List[str]], output: bool=True, prefix: str='
     return (not p.returncode, result)
 
 
-def execute_git(command: str, output: bool=True, prefix: str='', grep: str="") -> Tuple[bool, str]:
-    return execute_command('git %s' % command, output, prefix, grep)
+def execute_git(command: Union[str, List[str]], output: bool=True, prefix: str='', grep: str="") -> Tuple[bool, str]:
+    if isinstance(command, str):
+        return execute_command('git %s' % command, output, prefix, grep)
+    else:
+        command.insert(0, "git")
+        return execute_command(command, output, prefix, grep)
 
 
 def get_branches(remote: bool=False, all: bool=False, merged: bool=False, no_merged: bool=False) -> List[str]:
