@@ -85,7 +85,7 @@ def print_log(commit_1: str, commit_2: str, all_commits: bool=False) -> None:
     if only_messages:
         cmd.append('--oneline')
     elif markdown:
-        cmd.append('--format=* %s')
+        cmd.append('--format=- %s')
     else:
         cmd.append('--format=%x20%x20%x20%h%x20%Cgreen%an%Creset%x20\"%Cred%s%Creset\",%x20%ar')
 
