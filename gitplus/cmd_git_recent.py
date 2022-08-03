@@ -58,6 +58,7 @@ for branch in branches:
     if not success:
         mod_sys.stderr.write(cmd)
         mod_sys.stderr.write(result)
+        mod_sys.exit(1)
 
     time_diff_seconds = int(now) - int(result)
     if (not success) or (len(result.strip()) == 0):
