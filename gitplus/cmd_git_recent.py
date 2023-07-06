@@ -38,6 +38,10 @@ parser.add_argument('-m', '--merged', action='store_true',
                     default=False, help='Only merged branches')
 parser.add_argument('entries', metavar='entries', type=int, default=1000, nargs='?',
                     help='Number of entries (negative number if you want the last N entries)')
+parser.add_argument('-ch', '--checkout', action='store_true',
+                    default=False, help='Checkout to branch')
+parser.add_argument('-chn', '--checkoutnth',
+                    default=False, help='Checkout to n-th branch')
 
 args = parser.parse_args()
 
@@ -50,6 +54,9 @@ merged: bool = args.merged
 remote: bool = args.remote
 get_all: bool = args.all
 no_merged: bool = args.no_merged
+checkout = args.checkout
+checkout_nth = args.checkoutnth
+enumerate = checkout or checkout_nth
 
 branches = git.get_branches(remote, merged=merged, no_merged=no_merged, all=get_all)
 for branch in branches:
@@ -81,5 +88,24 @@ if entries > 0:
 if entries < 0:
     times_and_branches = times_and_branches[entries:]
 
+n = 0
 for _, branch in times_and_branches:
-    print(branch)
+    n += 1
+    if enumerate:
+        print(f"  [{n}] {branch}")
+    else:
+        print(branch)
+
+if checkout or checkout_nth:
+    try:
+        if checkout_nth:
+            ch_n = int(checkout_nth)
+        else:
+            print(f"Checkout to (1-{n})?")
+            ch_n = int(input())
+    except:
+        mod_sys.exit(1)
+
+    branch = times_and_branches[ch_n-1][1].split(":")[1].strip()
+    print(f"Checkout to #{ch_n}: f{branch}")
+    git.execute_git(["checkout", branch])

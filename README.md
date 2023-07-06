@@ -212,6 +212,20 @@ Show only **first** 15 branches:
 
     git recent 15
 
+It can also be used to switch between recent branches:
+
+    $  git recent 5 -ch
+    [2]    1007.41 days: execute-command
+    [3]    1089.03 days: faster-mypy
+    [4]    1158.07 days: xoxys-master
+    [5]    1301.04 days: ktor-add_nixos_compatible_shebangs
+    Checkout to (1-5)?
+    2
+
+You can also skip asking and, for example, just "checkout to the 3rd most recent":
+
+    git recent -chn 3
+
 # Git semver
 
 List all git semver tags (i.e. tags in the format `vX.Y.Z`):
