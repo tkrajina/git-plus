@@ -26,9 +26,9 @@ git.assert_in_git_repository()
 parser = argparse.ArgumentParser(
     description='Detects (and possibly deletes) old unused branches')
 
-parser.add_argument('--no-merged', action='store_true',
+parser.add_argument('-n', '--no-merged', action='store_true',
                     default=False, help='Only *not* merged branches')
-parser.add_argument('--merged', action='store_true',
+parser.add_argument('-m', '--merged', action='store_true',
                     default=False, help='Only merged branches')
 parser.add_argument('-r', '--remote', action='store_true',
                     default=False, help='Get remote branches')

@@ -226,6 +226,18 @@ You can also skip asking and, for example, just "checkout to the 3rd most recent
 
     git recent -chn 3
 
+Similarly, use:
+
+    git recent -me
+
+To ask which recent branch to merge (in the current branch).
+
+...or...
+
+    git recent -men
+
+...to merge the nth recent branch.
+
 # Git semver
 
 List all git semver tags (i.e. tags in the format `vX.Y.Z`):

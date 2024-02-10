@@ -38,10 +38,15 @@ parser.add_argument('-m', '--merged', action='store_true',
                     default=False, help='Only merged branches')
 parser.add_argument('entries', metavar='entries', type=int, default=1000, nargs='?',
                     help='Number of entries (negative number if you want the last N entries)')
+parser.add_argument('-x', '--execute-command', help='Execute command with branch name')
 parser.add_argument('-ch', '--checkout', action='store_true',
                     default=False, help='Checkout to branch')
 parser.add_argument('-chn', '--checkoutnth',
                     default=False, help='Checkout to n-th branch')
+parser.add_argument('-me', '--merge', action='store_true',
+                    default=False, help='Merge recent branch')
+parser.add_argument('-men', '--mergenth', action='store_true',
+                    default=False, help='Merge nth recent branch')
 
 args = parser.parse_args()
 
@@ -54,9 +59,14 @@ merged: bool = args.merged
 remote: bool = args.remote
 get_all: bool = args.all
 no_merged: bool = args.no_merged
-checkout = args.checkout
-checkout_nth = args.checkoutnth
-enumerate = checkout or checkout_nth
+execute_command = args.execute_command
+merge = args.merge
+merge_nth = args.mergenth
+
+if args.checkout:
+    execute_command = "checkout"
+
+nth_branch = execute_command or merge or merge_nth
 
 branches = git.get_branches(remote, merged=merged, no_merged=no_merged, all=get_all)
 for branch in branches:
@@ -91,21 +101,29 @@ if entries < 0:
 n = 0
 for _, branch in times_and_branches:
     n += 1
-    if enumerate:
+    if nth_branch:
         print(f"  [{n}] {branch}")
     else:
         print(branch)
 
-if checkout or checkout_nth:
+if nth_branch:
+    nth = None
     try:
-        if checkout_nth:
-            ch_n = int(checkout_nth)
-        else:
-            print(f"Checkout to (1-{n})?")
-            ch_n = int(input())
+        if merge_nth:
+            nth = int(merge_nth)
+        if execute_command:
+            nth = int(input(f"Execute {execute_command} with branch (1-{n})? "))
+        if merge:
+            nth = int(input(f"Merge (1-{n})? "))
     except:
         mod_sys.exit(1)
 
-    branch = times_and_branches[ch_n-1][1].split(":")[1].strip()
-    print(f"Checkout to #{ch_n}: f{branch}")
-    git.execute_git(["checkout", branch])
+    if not nth:
+        mod_sys.exit(1)
+
+    branch = times_and_branches[nth-1][1].split(":")[1].strip()
+
+    if execute_command:
+        git.execute_git([execute_command, branch])
+    if merge or merge_nth:
+        git.execute_git(["merge", branch])
