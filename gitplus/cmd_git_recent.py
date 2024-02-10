@@ -70,6 +70,8 @@ nth_branch = execute_command or merge or merge_nth
 
 branches = git.get_branches(remote, merged=merged, no_merged=no_merged, all=get_all)
 for branch in branches:
+    if "HEAD detached" in branch:
+        continue
     cmd = 'log ' + branch + ' -1 --format=%at --'
     success, result = git.execute_git(cmd, output=False)
     if not success:
