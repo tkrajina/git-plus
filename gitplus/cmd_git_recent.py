@@ -21,111 +21,113 @@ from . import git
 
 from typing import *
 
-git.assert_in_git_repository()
 
-parser = mod_argparse.ArgumentParser(
-    description='Show list of branches sorted by last commit time')
+def main():
+    git.assert_in_git_repository()
 
-parser.add_argument('-r', '--remote', action='store_true',
-                    default=False, help='Get remote branches')
-parser.add_argument('-b', '--brief', action='store_true',
-                    default=False, help='brief output')
-parser.add_argument('-a', '--all', action='store_true',
-                    default=False, help='Get all (local and remote) branches')
-parser.add_argument('-n', '--no-merged', action='store_true',
-                    default=False, help='Only *not* merged branches')
-parser.add_argument('-m', '--merged', action='store_true',
-                    default=False, help='Only merged branches')
-parser.add_argument('entries', metavar='entries', type=int, default=1000, nargs='?',
-                    help='Number of entries (negative number if you want the last N entries)')
-parser.add_argument('-x', '--execute-command', help='Execute command with branch name')
-parser.add_argument('-ch', '--checkout', action='store_true',
-                    default=False, help='Checkout to branch')
-parser.add_argument('-chn', '--checkoutnth',
-                    default=False, help='Checkout to n-th branch')
-parser.add_argument('-me', '--merge', action='store_true',
-                    default=False, help='Merge recent branch')
-parser.add_argument('-men', '--mergenth', action='store_true',
-                    default=False, help='Merge nth recent branch')
+    parser = mod_argparse.ArgumentParser(
+        description='Show list of branches sorted by last commit time')
 
-args = parser.parse_args()
+    parser.add_argument('-r', '--remote', action='store_true',
+                        default=False, help='Get remote branches')
+    parser.add_argument('-b', '--brief', action='store_true',
+                        default=False, help='brief output')
+    parser.add_argument('-a', '--all', action='store_true',
+                        default=False, help='Get all (local and remote) branches')
+    parser.add_argument('-n', '--no-merged', action='store_true',
+                        default=False, help='Only *not* merged branches')
+    parser.add_argument('-m', '--merged', action='store_true',
+                        default=False, help='Only merged branches')
+    parser.add_argument('entries', metavar='entries', type=int, default=1000, nargs='?',
+                        help='Number of entries (negative number if you want the last N entries)')
+    parser.add_argument('-x', '--execute-command', help='Execute command with branch name')
+    parser.add_argument('-ch', '--checkout', action='store_true',
+                        default=False, help='Checkout to branch')
+    parser.add_argument('-chn', '--checkoutnth',
+                        default=False, help='Checkout to n-th branch')
+    parser.add_argument('-me', '--merge', action='store_true',
+                        default=False, help='Merge recent branch')
+    parser.add_argument('-men', '--mergenth', action='store_true',
+                        default=False, help='Merge nth recent branch')
 
-now = mod_time.time()
+    args = parser.parse_args()
 
-times_and_branches = []
+    now = mod_time.time()
 
-brief: bool = args.brief
-merged: bool = args.merged
-remote: bool = args.remote
-get_all: bool = args.all
-no_merged: bool = args.no_merged
-execute_command = args.execute_command
-merge = args.merge
-merge_nth = args.mergenth
+    times_and_branches = []
 
-if args.checkout:
-    execute_command = "checkout"
+    brief: bool = args.brief
+    merged: bool = args.merged
+    remote: bool = args.remote
+    get_all: bool = args.all
+    no_merged: bool = args.no_merged
+    execute_command = args.execute_command
+    merge = args.merge
+    merge_nth = args.mergenth
 
-nth_branch = execute_command or merge or merge_nth
+    if args.checkout:
+        execute_command = "checkout"
 
-branches = git.get_branches(remote, merged=merged, no_merged=no_merged, all=get_all)
-for branch in branches:
-    if "HEAD detached" in branch:
-        continue
-    cmd = 'log ' + branch + ' -1 --format=%at --'
-    success, result = git.execute_git(cmd, output=False)
-    if not success:
-        mod_sys.stderr.write(cmd)
-        mod_sys.stderr.write(result)
-        mod_sys.exit(1)
+    nth_branch = execute_command or merge or merge_nth
 
-    time_diff_seconds = int(now) - int(result)
-    if (not success) or (len(result.strip()) == 0):
-        print('Cannot find the age of %s' % branch)
-    elif brief:
-        times_and_branches.append((time_diff_seconds, branch))
-    else:
-        time_diff_days = int((float(time_diff_seconds) / (60*60*24)) * 100) / 100.
-        times_and_branches.append((time_diff_seconds, '%10s days: %s' % (time_diff_days, branch), ))
+    branches = git.get_branches(remote, merged=merged, no_merged=no_merged, all=get_all)
+    for branch in branches:
+        if "HEAD detached" in branch:
+            continue
+        cmd = 'log ' + branch + ' -1 --format=%at --'
+        success, result = git.execute_git(cmd, output=False)
+        if not success:
+            mod_sys.stderr.write(cmd)
+            mod_sys.stderr.write(result)
+            mod_sys.exit(1)
 
-times_and_branches.sort()
+        time_diff_seconds = int(now) - int(result)
+        if (not success) or (len(result.strip()) == 0):
+            print('Cannot find the age of %s' % branch)
+        elif brief:
+            times_and_branches.append((time_diff_seconds, branch))
+        else:
+            time_diff_days = int((float(time_diff_seconds) / (60*60*24)) * 100) / 100.
+            times_and_branches.append((time_diff_seconds, '%10s days: %s' % (time_diff_days, branch), ))
 
-try:
-    entries = int(args.entries)
-except:
-    entries = 1000
+    times_and_branches.sort()
 
-if entries > 0:
-    times_and_branches = times_and_branches[:entries]
-if entries < 0:
-    times_and_branches = times_and_branches[entries:]
-
-n = 0
-for _, branch in times_and_branches:
-    n += 1
-    if nth_branch:
-        print(f"  [{n}] {branch}")
-    else:
-        print(branch)
-
-if nth_branch:
-    nth = None
     try:
-        if merge_nth:
-            nth = int(merge_nth)
-        if execute_command:
-            nth = int(input(f"Execute {execute_command} with branch (1-{n})? "))
-        if merge:
-            nth = int(input(f"Merge (1-{n})? "))
+        entries = int(args.entries)
     except:
-        mod_sys.exit(1)
+        entries = 1000
 
-    if not nth:
-        mod_sys.exit(1)
+    if entries > 0:
+        times_and_branches = times_and_branches[:entries]
+    if entries < 0:
+        times_and_branches = times_and_branches[entries:]
 
-    branch = times_and_branches[nth-1][1].split(":")[1].strip()
+    n = 0
+    for _, branch in times_and_branches:
+        n += 1
+        if nth_branch:
+            print(f"  [{n}] {branch}")
+        else:
+            print(branch)
 
-    if execute_command:
-        git.execute_git([execute_command, branch])
-    if merge or merge_nth:
-        git.execute_git(["merge", branch])
+    if nth_branch:
+        nth = None
+        try:
+            if merge_nth:
+                nth = int(merge_nth)
+            if execute_command:
+                nth = int(input(f"Execute {execute_command} with branch (1-{n})? "))
+            if merge:
+                nth = int(input(f"Merge (1-{n})? "))
+        except:
+            mod_sys.exit(1)
+
+        if not nth:
+            mod_sys.exit(1)
+
+        branch = times_and_branches[nth-1][1].split(":")[1].strip()
+
+        if execute_command:
+            git.execute_git([execute_command, branch])
+        if merge or merge_nth:
+            git.execute_git(["merge", branch])

@@ -21,66 +21,68 @@ import sys
 
 from . import git
 
-git.assert_in_git_repository()
 
-parser = argparse.ArgumentParser(
-    description='Detects (and possibly deletes) old unused branches')
+def main():
+    git.assert_in_git_repository()
 
-parser.add_argument('-n', '--no-merged', action='store_true',
-                    default=False, help='Only *not* merged branches')
-parser.add_argument('-m', '--merged', action='store_true',
-                    default=False, help='Only merged branches')
-parser.add_argument('-r', '--remote', action='store_true',
-                    default=False, help='Get remote branches')
-parser.add_argument('-a', '--all', action='store_true',
-                    default=False, help='Get all (local and remote) branches')
-parser.add_argument('-d', '--days', default=180, type=int,
-                    help='How many days old must a branch be')
-parser.add_argument('--delete', action='store_true', default=False,
-                    help='Remove branches older than ... days (you\'ll be asked to confirm the deletion)')
+    parser = argparse.ArgumentParser(
+        description='Detects (and possibly deletes) old unused branches')
 
-args = parser.parse_args()
+    parser.add_argument('-n', '--no-merged', action='store_true',
+                        default=False, help='Only *not* merged branches')
+    parser.add_argument('-m', '--merged', action='store_true',
+                        default=False, help='Only merged branches')
+    parser.add_argument('-r', '--remote', action='store_true',
+                        default=False, help='Get remote branches')
+    parser.add_argument('-a', '--all', action='store_true',
+                        default=False, help='Get all (local and remote) branches')
+    parser.add_argument('-d', '--days', default=180, type=int,
+                        help='How many days old must a branch be')
+    parser.add_argument('--delete', action='store_true', default=False,
+                        help='Remove branches older than ... days (you\'ll be asked to confirm the deletion)')
 
-now = time.time()
+    args = parser.parse_args()
 
-remote: bool = args.remote
-all_branches: bool = args.all
-merged: bool = args.merged
-no_merged: bool = args.no_merged
+    now = time.time()
 
-branches = git.get_branches(remote, all_branches, merged=merged, no_merged=no_merged)
-delete_all = False
-for branch in branches:
-    if remote and not branch.startswith("remotes/"):
-        branch = f"remotes/{branch}"
-    command = 'log ' + branch + ' -1 --format=%at --'
-    success, result = git.execute_git(command, output=False)
-    if not success:
-        sys.stderr.write(command)
-        sys.stderr.write(result)
-        sys.exit(1)
+    remote: bool = args.remote
+    all_branches: bool = args.all
+    merged: bool = args.merged
+    no_merged: bool = args.no_merged
 
-    if len(result.strip()) == 0:
-        print('Cannot find the age of %s' % branch)
-    else:
-        time_diff_seconds = int(now) - int(result)
-        time_diff_days = int((float(time_diff_seconds) / (60*60*24)) * 100) / 100.
+    branches = git.get_branches(remote, all_branches, merged=merged, no_merged=no_merged)
+    delete_all = False
+    for branch in branches:
+        if remote and not branch.startswith("remotes/"):
+            branch = f"remotes/{branch}"
+        command = 'log ' + branch + ' -1 --format=%at --'
+        success, result = git.execute_git(command, output=False)
+        if not success:
+            sys.stderr.write(command)
+            sys.stderr.write(result)
+            sys.exit(1)
 
-        #print 'Last commit in %s was %s days ago' % (branch, time_diff_days)
+        if len(result.strip()) == 0:
+            print('Cannot find the age of %s' % branch)
+        else:
+            time_diff_seconds = int(now) - int(result)
+            time_diff_days = int((float(time_diff_seconds) / (60*60*24)) * 100) / 100.
 
-        if time_diff_days > args.days:
-            print('Branch %s is older than %s days (%s)!' % (branch, args.days, time_diff_days))
-            if args.delete:
-                if delete_all:
-                    answer = 'y'
-                else:
-                    answer = input('Remove [y/N/all] ?')
+            #print 'Last commit in %s was %s days ago' % (branch, time_diff_days)
 
-                if answer.lower() == 'all' and input(f"Really delete all filtered branches [y/N]?") == 'y':
-                    delete_all = True
-                    answer = 'y'
+            if time_diff_days > args.days:
+                print('Branch %s is older than %s days (%s)!' % (branch, args.days, time_diff_days))
+                if args.delete:
+                    if delete_all:
+                        answer = 'y'
+                    else:
+                        answer = input('Remove [y/N/all] ?')
 
-                if answer.lower() == 'y':
-                    git.delete_branch(branch, force=True)
-                else:
-                    print('Not deleted')
+                    if answer.lower() == 'all' and input(f"Really delete all filtered branches [y/N]?") == 'y':
+                        delete_all = True
+                        answer = 'y'
+
+                    if answer.lower() == 'y':
+                        git.delete_branch(branch, force=True)
+                    else:
+                        print('Not deleted')

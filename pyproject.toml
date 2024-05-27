@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "gitplus"
+version = "0.4.0"
+description = ""
+authors = [
+    "Tomo Krajina <tkrajina@gmail.com>",
+    "Isaac Riley <isaac.r.riley@gmail.com>"
+]
+readme = "README.md"
+packages = [{ include = "gitplus", from = "." }]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+
+[tool.poetry.scripts]
+git-multi = "gitplus.cmd_git_multi:main"
+git-old-branches = "gitplus.cmd_git_old_branches:main"
+git-recent = "gitplus.cmd_git_recent:main"
+git-relation = "gitplus.cmd_git_relation:main"
+git-semver = "gitplus.cmd_git_semver:main"
+
+[tool.pylint]
+max-line-length = 100
+docstring-min-length=4
+
+[tool.black]
+line-length = 100
+
+[tool.isort]
+profile = "black"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
