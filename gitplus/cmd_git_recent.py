@@ -101,12 +101,12 @@ if entries < 0:
     times_and_branches = times_and_branches[entries:]
 
 n = 0
-for _, branch in times_and_branches:
+for _, branch, _ in times_and_branches:
     n += 1
     if nth_branch:
-        print(f"  [{n}] {branch}")
+        print(f" [{n}] {branch}")
     else:
-        print(branch)
+        print("  ", branch)
 
 if nth_branch:
     nth = None
@@ -123,7 +123,7 @@ if nth_branch:
     if not nth:
         mod_sys.exit(1)
 
-    branch = times_and_branches[nth-1][1].split(":")[1].strip()
+    branch = times_and_branches[nth-1][2].strip()
 
     if execute_command:
         git.execute_git([execute_command, branch])
