@@ -39,6 +39,7 @@ parser.add_argument('-m', '--merged', action='store_true',
 parser.add_argument('entries', metavar='entries', type=int, default=1000, nargs='?',
                     help='Number of entries (negative number if you want the last N entries)')
 parser.add_argument('-x', '--execute-command', help='Execute command with branch name')
+parser.add_argument('-ix', '--input-execute-command', action="store_true", help='Execute command with branch name (input for command)')
 parser.add_argument('-ch', '--checkout', action='store_true',
                     default=False, help='Checkout to branch')
 parser.add_argument('-chn', '--checkoutnth',
@@ -60,13 +61,14 @@ remote: bool = args.remote
 get_all: bool = args.all
 no_merged: bool = args.no_merged
 execute_command = args.execute_command
+input_execute_command: bool = args.input_execute_command
 merge = args.merge
 merge_nth = args.mergenth
 
 if args.checkout:
     execute_command = "checkout"
 
-nth_branch = execute_command or merge or merge_nth
+nth_branch = execute_command or merge or merge_nth or input_execute_command
 
 branches = git.get_branches(remote, merged=merged, no_merged=no_merged, all=get_all)
 for branch in branches:
@@ -86,7 +88,7 @@ for branch in branches:
         times_and_branches.append((time_diff_seconds, branch))
     else:
         time_diff_days = int((float(time_diff_seconds) / (60*60*24)) * 100) / 100.
-        times_and_branches.append((time_diff_seconds, '%10s days: %s' % (time_diff_days, branch), ))
+        times_and_branches.append((time_diff_seconds, f'{branch}  ({time_diff_days} days)', branch))
 
 times_and_branches.sort()
 
@@ -113,6 +115,8 @@ if nth_branch:
     try:
         if merge_nth:
             nth = int(merge_nth)
+        if input_execute_command:
+            execute_command = input("Execute command (for example checkout, merge, ...)? ")
         if execute_command:
             nth = int(input(f"Execute {execute_command} with branch (1-{n})? "))
         if merge:
