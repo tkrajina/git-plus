@@ -130,6 +130,8 @@ if nth_branch:
     branch = times_and_branches[nth-1][2].strip()
 
     if execute_command:
+        print(f"Command: git {execute_command} {branch}")
         git.execute_git([execute_command, branch])
     if merge or merge_nth:
+        print(f"Command: git merge {branch}")
         git.execute_git(["merge", branch])
