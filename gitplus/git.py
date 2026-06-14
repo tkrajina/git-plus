@@ -58,9 +58,12 @@ def get_branches(remote: bool=False, all: bool=False, merged: bool=False, no_mer
     assert result
 
     def _filter_branch(branch: str) -> str:
-        if '*' in branch:
-            # Current branch:
-            return branch.replace('*', '').strip()
+        if branch.startswith('+'):
+            # Worktree branch (checked out in another worktree)
+            return branch[1:].strip()
+        elif branch.startswith('*'):
+            # Current branch
+            return branch[1:].strip()
         elif '->' in branch:
             # Branch is an alias
             return branch.split('->')[0].strip()
