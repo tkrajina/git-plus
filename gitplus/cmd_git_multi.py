@@ -23,6 +23,10 @@ from . import utils
 
 from typing import *
 
+class term_colors:
+    BLUE = '\033[34m'
+    RESET = '\033[0m'
+
 # Prefix for git command output:
 PREFIX = '\t'
 
@@ -71,7 +75,7 @@ def process_project(current_path: str, file_name: str) -> None:
         do_output = True
 
     if not group_by_output:
-        print('%s:' % file_name)
+        print(term_colors.BLUE+'%s:' % file_name+term_colors.RESET)
 
     execute = True
     if only_if_changed:
@@ -216,6 +220,6 @@ if group_by_output:
 
     result_outputs.sort()
     for key, value in result_outputs:
-        print(key)
+        print(term_colors.BLUE+key+term_colors.RESET)
         print(value)
         print()
