@@ -45,7 +45,7 @@ def parse_tag_as_semver(tag: str) -> Optional[Version]:
         patch = parts[2]
         suffix = ""
         if "-" in patch:
-            patch, sufix = patch.split("-", 1)
+            patch, suffix = patch.split("-", 1)
         return Version(tag, prefix, int(parts[0]), int(parts[1]), int(patch), suffix)
     except:
         return None
